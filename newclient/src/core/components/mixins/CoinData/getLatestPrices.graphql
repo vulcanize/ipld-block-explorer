@@ -1,0 +1,23 @@
+query getAllContracts {
+  allContracts {
+    nodes {
+      name
+      contractId
+      address
+    }
+  }
+}
+query getLatestPrices {
+    getLatestPrices {
+        id
+        symbol
+        name
+        image
+        contract
+        current_price
+        market_cap
+        total_volume
+        total_supply
+        price_change_percentage_24h
+    }
+}

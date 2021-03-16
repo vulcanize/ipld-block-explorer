@@ -1,0 +1,57 @@
+query getBlocksArrayByNumber($fromBlock: Int, $limit: Int) {
+    getBlocksArrayByNumber(fromBlock: $fromBlock, limit: $limit) {
+        number
+        miner
+        txCount
+        timestamp
+        rewards {
+            total
+        }
+        txFail
+    }
+}
+subscription newBlockTable {
+    newBlockFeed {
+        number
+        miner
+        txCount
+        timestamp
+        rewards {
+            total
+        }
+    }
+}
+query allContracts {
+    allContracts {
+        nodes {
+            name
+            contractId
+            address
+        }
+        totalCount
+    }
+}
+
+query allHeaders {
+    allHeaders {
+        nodes {
+            blockNumber
+            blockTimestamp
+            id
+        }
+        totalCount
+    }
+}
+
+query AllBlocks {
+    allEthHeaderCids {
+        nodes {
+            id
+            blockNumber
+            blockHash
+            cid
+            reward
+        }
+        totalCount
+    }
+}

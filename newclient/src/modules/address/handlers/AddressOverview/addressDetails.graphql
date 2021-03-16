@@ -1,0 +1,20 @@
+query getEthBalance($hash: String!) {
+    getEthBalance(owner: $hash) {
+        balance
+    }
+}
+
+query getContractMeta($hash: String!) {
+    getContractMeta(contract: $hash) {
+      block,
+      codeHash,
+      creator,
+      transactionHash
+    }
+}
+
+query getContractTimestamp($hash: String!) {
+    getTransactionByHash(hash: $hash) {
+        timestamp
+    }
+}
