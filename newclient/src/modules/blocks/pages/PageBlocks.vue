@@ -63,13 +63,13 @@ export default class PageBlocks extends Mixins(NewBlockSubscription) {
             }
         }
     }
-    @Watch('hasNewBlockUpdateError')
-    /**
-     * Watches hasNewBlockUpdateError
-     * @param newVal {Boolean}
-     */
-    onHasNewBlockUpdateErrorChanged(newVal: boolean): void {
-        this.setError(newVal, ErrorMessageBlock.subscription)
-    }
+    // @Watch('hasNewBlockUpdateError')
+    // /**
+    //  * Watches hasNewBlockUpdateError
+    //  * @param newVal {Boolean}
+    //  */
+    // onHasNewBlockUpdateErrorChanged(newVal: boolean): void {
+    //     this.setError(newVal, ErrorMessageBlock.subscription)
+    // }
 }
 </script>

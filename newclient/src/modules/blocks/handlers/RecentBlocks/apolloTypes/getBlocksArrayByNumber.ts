@@ -29,6 +29,11 @@ export interface allEthHeaderCids_allEthHeaderCids {
     blockHash: string;
     reward: string;
     cid: string;
+    blockByMhKey: {
+      data: string;
+    }
+    receiptRoot: string;
+    td: string;
   }
   totalCount: number;
 }
