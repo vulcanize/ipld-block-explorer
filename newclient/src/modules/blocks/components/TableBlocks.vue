@@ -95,9 +95,6 @@ export default class TableBlocks extends Vue {
     get getStyle(): string {
         return this.isScrollView ? SCROLLVIEW : ''
     }
-    mounted() {
-        console.log('TableBlocks', this.blockData)
-    }
 }
 </script>
 

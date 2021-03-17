@@ -61,7 +61,8 @@ import { decodeHeaderData } from '@vulcanize/eth-watcher-ts/dist/utils'
             result({ data }) {
                 if (data.ethHeaderCidByBlockNumber && data.ethHeaderCidByBlockNumber.nodes.length) {
                   const _obj = decodeHeaderData(data.ethHeaderCidByBlockNumber.nodes[0].blockByMhKey.data)
-                  this.header = {...data.ethHeaderCidByBlockNumber.nodes[0], ..._obj}
+                  const transactionsCount = data.ethHeaderCidByBlockNumber.nodes[0].ethTransactionCidsByHeaderId.totalCount
+                  this.header = {...data.ethHeaderCidByBlockNumber.nodes[0], ..._obj, transactionsCount}
                 }
                 if (this.header) {
                     if (this.isHash) {
@@ -138,10 +139,11 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 }
             ]
         } else {
-            details = [
+          console.log('Block details: ', this.header)
+          details = [
                 {
                     title: this.$i18n.t('common.height'),
-                    detail: '-'
+                    detail: this.header.blockNumber
                 },
                 {
                     title: this.$i18n.t('common.hash'),
@@ -175,7 +177,7 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.tc('tx.fee', 2),
-                    detail: '-', //'${this.transactionFees.value} ${this.transactionFees.unit}',
+                    detail: '-', // `${this.transactionFees.value} ${this.transactionFees.unit}`,
                     // tooltip: '', // this.transactionFees.tooltipText ? `${this.transactionFees.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
                 },
 
@@ -186,11 +188,11 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.tc('tx.name', 2),
-                    detail: '-', // this.transactionsCount
+                    detail: this.header.transactionsCount, // this.transactionsCount
                 },
                 {
                     title: this.$i18n.t('diff.name'),
-                    detail: '-', // this.formatNumber(new BN(this.block.difficulty).toNumber())
+                    detail: this.formatNumber(new BN(this.header.difficulty).toNumber()),
                 },
                 {
                     title: this.$i18n.t('diff.total'),
@@ -202,11 +204,11 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.t('common.nonce'),
-                    detail: '-', // this.formatNumber(new BN(this.block.nonce).toNumber())
+                    detail: this.formatNumber(new BN(this.header.nonce).toNumber())
                 },
                 {
                     title: this.$i18n.t('block.state-root'),
-                    detail: this.header.root, // this.block.stateRoot,
+                    detail: this.header.stateRoot,
                     mono: true
                 },
                 {
@@ -217,11 +219,11 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
 
                 {
                     title: this.$i18n.t('gas.limit'),
-                    detail: this.header.gasLimit, // this.formatNumber(this.block.gasLimit)
+                    detail: this.formatNumber(new BN(this.header.gasLimit, 16))
                 },
                 {
                     title: this.$i18n.t('gas.used'),
-                    detail: this.header.gasUsed, // this.formatNumber(this.block.gasUsed)
+                    detail: this.formatNumber(this.header.gasUsed)
                 },
                 {
                     title: this.$i18n.t('block.logs'),
@@ -230,7 +232,7 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.t('tx.root'),
-                    detail: this.header.td, // td = transaction?,
+                    detail: this.header.txRoot, // td = transaction?,
                     // mono: true
                 },
                 {
@@ -254,7 +256,8 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
         return 'this.formatVariableUnitEthValue(new BN(this.header.summary.rewards.uncles))'
     }
     get transactionFees(): FormattedNumber | string {
-        return 'this.formatVariableUnitEthValue(new BN(this.header.summary.rewards.txFees))'
+        // return this.formatVariableUnitEthValue(new BN(this.header.gasLimit, 16).multipliedBy(new BN(this.header.gasUsed)))
+        // return 'this.formatVariableUnitEthValue(new BN(this.header.summary.rewards.txFees))'
     }
     get transactionsCount(): string {
         // const failed = this.block.summary.txFail ? 1 : 2
