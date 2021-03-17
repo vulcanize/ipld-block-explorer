@@ -46,7 +46,7 @@ import AppNewUpdate from '@app/core/components/ui/AppNewUpdate.vue'
 import TableTxs from '@app/modules/txs/components/TableTxs.vue'
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import BN from 'bignumber.js'
-import { getBlockTransfers, getAllTxs, newTransfersCompleteFeed, getTransaction } from './queryTransfers.graphql'
+import { getBlockTransfers, getAllTxs, newTransfersCompleteFeed, getTransactions } from './queryTransfers.graphql'
 import {
     getBlockTransfers_getBlockTransfers as TypeBlockTransfers,
     getBlockTransfers_getBlockTransfers_transfers as TypeTransfers,
@@ -57,6 +57,7 @@ import { getAllTxs_getAllEthTransfers as AllTxType } from './apolloTypes/getAllT
 import { TransferType } from '@app/apollo/global/globalTypes'
 import { ErrorMessageBlock } from '@app/modules/blocks/models/ErrorMessagesForBlock'
 import { excpInvariantViolation } from '@app/apollo/exceptions/errorExceptions'
+import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
 
 @Component({
     components: {
@@ -68,7 +69,7 @@ import { excpInvariantViolation } from '@app/apollo/exceptions/errorExceptions'
     },
     apollo: {
         allEthTransactionCids: {
-            query: getTransaction,
+            query: getTransactions,
             fetchPolicy: 'network-only',
             // skip() {
             //     return this.skipBlockTxs
@@ -77,11 +78,10 @@ import { excpInvariantViolation } from '@app/apollo/exceptions/errorExceptions'
             //     return this.blockRef ? { _number: parseInt(this.blockRef) } : undefined
             // },
             result({ data }) {
-                if (data && data.allEthTransactionCids) {
-                    // console.log('Result ', data)
-                    // if (data.getBlockTransfers.transfers.length > 0) {
-                    //     this.totalPages = Math.ceil(new BN(data.getBlockTransfers.transfers.length).div(this.maxItems).toNumber())
-                    // }
+                if (data && data.allEthTransactionCids && data.allEthTransactionCids.nodes) {
+                    const _data = '\\xf86701843b9aca0082ffff946ba97b3689a4f3a9cda424e8da80bf882791dbed80846626b26d2ba0b684820d7c148cfb8009b96c8772dbc5e3e2d8e6fbc08b79dc47313ad36ac7a9a05d36be0c01a8293f5fc865cf905a0ebc8387be7875294b0100091d32ea2b1e01'
+                    const decodedData = decodeTransactionData(_data)
+                    this.allEthTransactionCids.nodes = data.allEthTransactionCids.nodes.map(node => ({...node, ...decodedData}))
                     this.emitErrorState(false)
                     this.initialLoad = false
                 }
@@ -277,14 +277,14 @@ export default class BlockTxs extends Vue {
         this.$emit('errorTxs', this.hasError, ErrorMessageBlock.blockTxs)
     }
 
-    @Watch('allEthTransactionCids')
-    onEthTransactionsChanged(newVal: string, oldVal: string) {
-        console.log('allEthTransactionCids WATCH ', newVal)
-        if (newVal !== oldVal) {
-            this.initialLoad = true
-            this.hasError = false
-        }
-    }
+    // @Watch('allEthTransactionCids')
+    // onEthTransactionsChanged(newVal: string, oldVal: string) {
+    //     console.log('allEthTransactionCids WATCH ', newVal)
+    //     if (newVal !== oldVal) {
+    //         this.initialLoad = true
+    //         this.hasError = false
+    //     }
+    // }
 }
 </script>
 <style scoped lang="css">

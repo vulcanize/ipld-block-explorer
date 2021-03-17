@@ -19,7 +19,7 @@ query getBlockTransfers($_number: Int) {
     }
 }
 
-query getTransaction {
+query getTransactions {
     allEthTransactionCids {
         nodes {
             id
@@ -29,6 +29,9 @@ query getTransaction {
             ethHeaderCidByHeaderId {
                 blockNumber
                 timestamp
+                blockByMhKey {
+                    data
+                }
             }
         }
         totalCount

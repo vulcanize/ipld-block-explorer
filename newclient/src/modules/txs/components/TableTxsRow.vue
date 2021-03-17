@@ -75,7 +75,7 @@
           =====================================================================================
           -->
                 <v-flex v-if="!isPending" sm2 lg1>
-                    <router-link :to="`/block/number/${transferObj.id}`" class="black--text text-truncate font-italic psmall">{{
+                    <router-link :to="`/block/number/${transaction.block}`" class="black--text text-truncate font-italic psmall">{{
                         transaction.block
                     }}</router-link>
                 </v-flex>
@@ -126,9 +126,9 @@
           LG: 8/12 (2)
           =====================================================================================
           -->
-                <v-flex sm3 lg2>
-                    <p :class="isPending ? 'pl-4' : ''">
-                        {{ 'transaction.value.value' }}
+                <v-flex sm2 lg2>
+                    <p class="text-center" :class="isPending ? 'pl-4' : ''">
+                        {{ transaction.amount }}
 <!--                        {{ transaction.value.value }}-->
 <!--                        {{ $t(`common.${transaction.value.unit}`) }}-->
 <!--                        <app-tooltip v-if="transaction.value.tooltipText" :text="`${transaction.value.tooltipText} ${$t('common.eth')}`" />-->
@@ -157,11 +157,11 @@
             lg: 12/12 (2)
           =====================================================================================
           -->
-                <v-flex hidden-md-and-down lg2>
-                    <p :class="('black--text', 'text-truncate', 'mb-0', isPending ? 'pl-3' : '')">
-                        {{ 'transaction.fee.value' }}
-                    </p>
-                </v-flex>
+<!--                <v-flex hidden-md-and-down lg2>-->
+<!--                    <p :class="('black&#45;&#45;text', 'text-truncate', 'mb-0', isPending ? 'pl-3' : '')">-->
+<!--                        {{ 'transaction.fee.value' }}-->
+<!--                    </p>-->
+<!--                </v-flex>-->
                 <!--
           =====================================================================================
           STATUS
@@ -236,13 +236,13 @@ export default class TableTxsRow extends Mixins(NumberFormatMixin) {
 
     get transaction(): Tx {
         const tx = this.isPending ? this.tx : this.transferObj
-        console.log('transaction ', tx)
         return {
             isMined: "this.isPending ? tx['isMined'] : false",
             hash: tx.txHash,
             block: (tx.ethHeaderCidByHeaderId || {}).blockNumber,
             from: tx.src,
             to: tx.dst,
+            amount: tx.amount || 0,
             timestamp: new Date(+(tx.ethHeaderCidByHeaderId || {}).timestamp  * 1e3),
             fee: "this.formatNonVariableEthValue(new BN(tx['txFee']))",
             value: "this.formatNonVariableEthValue(new BN(this.tx ? this.tx.value : ''))",

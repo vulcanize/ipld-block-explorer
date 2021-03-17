@@ -106,7 +106,6 @@ export default class TableTxs extends Vue {
     }
 
     get displayData(): any[] {
-      // console.log('displayData ', this.txsData)
         if (this.txsData) {
             // const start = this.index * this.maxItems
             // const end = start + this.maxItems > this.txsData.length ? this.txsData.length : start + this.maxItems
