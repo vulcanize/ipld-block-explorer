@@ -59,7 +59,11 @@ query getHeaderByNumber($blockRef: BigInt!) {
             parentHash
             receiptRoot
             reward
-            td
+            txRoot
+            stateRoot
+            ethTransactionCidsByHeaderId {
+                totalCount
+            }
         }
     }
 }

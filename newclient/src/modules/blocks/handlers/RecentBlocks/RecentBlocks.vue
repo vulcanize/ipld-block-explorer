@@ -86,9 +86,7 @@ interface BlockMap {
             //     }
             // ],
 
-            result({ data, ...rest}) {
-                console.log('Recent: ', data)
-                console.log('Rest: ', rest)
+            result({ data }) {
                 if (data && data.allEthHeaderCids && data.allEthHeaderCids.nodes) {
                     this.emitErrorState(false)
                     if (this.initialLoad) {
@@ -123,8 +121,6 @@ export default class RecentBlocks extends Vue {
     totalPages = 0
     startBlock!: number
     get blocks(): any {
-        console.log('indexedBlocks: ', this.indexedBlocks)
-        console.log('AllBlocks: ', this.allEthHeaderCids)
         // if (this.indexedBlocks && this.indexedBlocks[this.index]) {
         //     return this.indexedBlocks[this.index]
         // }
@@ -199,8 +195,6 @@ export default class RecentBlocks extends Vue {
     }
     @Watch('allEthHeaderCids', { deep: true })
     onGetHeadersChanged(val: TypeBlocks, oldVal: TypeBlocks) {
-        console.log('val: ', val.nodes)
-        console.log('this.indexedBlocks: ', this.indexedBlocks)
         if ((val || {}).nodes != (oldVal || {}).nodes) {
             this.$set(this.indexedBlocks, this.index, val.nodes)
         }
