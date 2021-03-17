@@ -33,16 +33,10 @@ router.onError(error => {
 })
 Vue.config.productionTip = false
 const httpLink = new HttpLink({
-  uri: 'http://localhost:5000/graphql', // configs.APOLLO_HTTP, // http://192.168.0.102:5000/graphql
-  // fetchOptions: {
-  //   mode: 'no-cors',
-  // },
-  // credentials: 'include',
-  headers: {
-    // 'content-type': 'application/json',
-  },
+  uri: configs.APOLLO_HTTP,
 })
-const wsHost = 'ws://localhost:5000/graphql' // configs.APOLLO_WS // ws://192.168.0.102:5000/graphiql
+const wsHost = configs.APOLLO_WS
+// @ts-ignore
 const subscriptionClient = new SubscriptionClient(wsHost, { lazy: true, reconnect: true }, null, [])
 const wsLink = new WebSocketLink(subscriptionClient)
 const onErrorLink = onError(({ graphQLErrors }) => {
@@ -77,7 +71,7 @@ const cache = new InMemoryCache()
 const apolloClient = new ApolloClient({
     link,
     cache,
-    connectToDevTools: true, // configs.NODE_ENV === 'development'
+    connectToDevTools: configs.NODE_ENV === 'development',
     // resolvers
 })
 
