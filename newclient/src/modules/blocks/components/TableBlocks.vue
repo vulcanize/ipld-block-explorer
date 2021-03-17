@@ -58,7 +58,7 @@ import AppFootnotes from '@app/core/components/ui/AppFootnotes.vue'
 import TableBlocksRow from '@app/modules/blocks/components/TableBlocksRow.vue'
 import AppTableRowLoading from '@app/core/components/ui/AppTableRowLoading.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
-const SCROLLVIEW = 'max-height: 450px'
+const SCROLLVIEW = 'max-height: 850px'
 
 @Component({
     components: {

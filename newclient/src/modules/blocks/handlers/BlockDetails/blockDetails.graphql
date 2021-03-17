@@ -48,6 +48,22 @@ query getHeaderById($blockRef: Int!) {
     }
 }
 
+query getHeaderByNumber($blockRef: BigInt!) {
+    ethHeaderCidByBlockNumber(n: $blockRef) {
+        nodes {
+            blockHash
+            blockNumber
+            blockByMhKey {
+                data
+            }
+            parentHash
+            receiptRoot
+            reward
+            td
+        }
+    }
+}
+
 query getBlockByHash($blockRef: String!) {
     getBlockByHash(hash: $blockRef) {
         ...BlockDetails

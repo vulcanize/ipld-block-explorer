@@ -29,7 +29,7 @@ import { Detail, Crumb } from '@app/core/components/props'
 import { eth } from '@app/core/helper'
 import { Mixins, Component, Prop } from 'vue-property-decorator'
 import { NumberFormatMixin } from '@app/core/components/mixins/number-format.mixin'
-import { getBlockByNumber, getBlockByHash, getLastBlockNumber, getHeaderById } from './blockDetails.graphql'
+import { getBlockByNumber, getBlockByHash, getLastBlockNumber, getHeaderByNumber } from './blockDetails.graphql'
 import { HeaderDetails as HeaderDetailsType } from './apolloTypes/BlockDetails'
 import { getLastBlockNumber_getLatestBlockInfo as lastBlockType } from './apolloTypes/getLastBlockNumber'
 import { FormattedNumber } from '@app/core/helper/number-format-helper'
@@ -38,6 +38,7 @@ import BN from 'bignumber.js'
 import { ErrorMessageBlock } from '@app/modules/blocks/models/ErrorMessagesForBlock'
 import newBlockFeed from '../../NewBlockSubscription/newBlockFeed.graphql'
 import { excpBlockNotMined } from '@app/apollo/exceptions/errorExceptions'
+import { decodeHeaderData } from '@vulcanize/eth-watcher-ts/dist/utils'
 
 @Component({
     components: {
@@ -47,7 +48,7 @@ import { excpBlockNotMined } from '@app/apollo/exceptions/errorExceptions'
     apollo: {
         header: {
             query() {
-                return this.isHash ? getBlockByHash : getHeaderById
+                return this.isHash ? getBlockByHash : getHeaderByNumber
             },
             // fetchPolicy: 'network-only',
             variables() {
@@ -58,8 +59,9 @@ import { excpBlockNotMined } from '@app/apollo/exceptions/errorExceptions'
             // },
             update: data => data.getBlockByHash || data.getHeaderById,
             result({ data }) {
-                if (data.ethHeaderCidById) {
-                  this.header = data.ethHeaderCidById
+                if (data.ethHeaderCidByBlockNumber && data.ethHeaderCidByBlockNumber.nodes.length) {
+                  const _obj = decodeHeaderData(data.ethHeaderCidByBlockNumber.nodes[0].blockByMhKey.data)
+                  this.header = {...data.ethHeaderCidByBlockNumber.nodes[0], ..._obj}
                 }
                 if (this.header) {
                     if (this.isHash) {
@@ -122,24 +124,24 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 {
                   title: this.$i18n.t('miner.total-rewards')
                 },
-                // {
-                //     title: this.$i18n.t('miner.name')
-                // },
-                // {
-                //     title: this.$i18n.t('uncle.reward')
-                // },
-                // {
-                //     title: this.$i18n.tc('tx.name', 2)
-                // },
-                // {
-                //     title: this.$i18n.t('diff.name')
-                // }
+                {
+                    title: this.$i18n.t('miner.name')
+                },
+                {
+                    title: this.$i18n.t('uncle.reward')
+                },
+                {
+                    title: this.$i18n.tc('tx.name', 2)
+                },
+                {
+                    title: this.$i18n.t('diff.name')
+                }
             ]
         } else {
             details = [
                 {
                     title: this.$i18n.t('common.height'),
-                    detail: 0
+                    detail: '-'
                 },
                 {
                     title: this.$i18n.t('common.hash'),
@@ -150,103 +152,103 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 {
                     title: this.$i18n.t('block.p-hash'),
                     detail: this.header.parentHash!,
-                    link: `/block/hash/${'this.block.parentHash'}`,
+                    // link: `/block/hash/${'this.block.parentHash'}`,
                     copy: true,
                     mono: true
                 },
                 {
                     title: this.$i18n.t('common.timestmp'),
-                    detail: new Date(+this.header.timestamp * 1e3).toString()
+                    detail: this.header.time
                 },
                 {
-                    title: this.$i18n.t('miner.total-rewards'),
-                    detail: this.header.reward,
-                    link: `/address/${'this.block.summary.miner'}`,
-                    copy: true,
-                    mono: true,
-                    toChecksum: true
+                  title: this.$i18n.t('miner.name'),
+                  detail: this.header.address,
+                  // link: `/address/${this.header.address}`,
+                  // copy: true,
+                  // mono: true,
+                  // toChecksum: true
                 },
-                // {
-                //     title: this.$i18n.t('miner.total-rewards'),
-                //     detail: '', // `${this.rewards.value} ${this.rewards.unit}`,
-                //     tooltip: '', // `${this.rewards.tooltipText} ${this.$i18n.t('common.eth')}` || undefined
-                // },
-                // {
-                //     title: this.$i18n.tc('tx.fee', 2),
-                //     detail: '', //'${this.transactionFees.value} ${this.transactionFees.unit}',
-                //     tooltip: '', // this.transactionFees.tooltipText ? `${this.transactionFees.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
-                // },
-                //
-                // {
-                //     title: this.$i18n.t('uncle.reward'),
-                //     detail: '', // `${this.uncleRewards.value} ${this.uncleRewards.unit}`,
-                //     tooltip: '', // this.uncleRewards.tooltipText ? `${this.uncleRewards.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
-                // },
-                // {
-                //     title: this.$i18n.tc('tx.name', 2),
-                //     detail: '', // this.transactionsCount
-                // },
-                // {
-                //     title: this.$i18n.t('diff.name'),
-                //     detail: '', // this.formatNumber(new BN(this.block.difficulty).toNumber())
-                // },
-                // {
-                //     title: this.$i18n.t('diff.total'),
-                //     detail: '', // this.formatNumber(new BN(this.block.totalDifficulty).toNumber())
-                // },
-                // {
-                //     title: this.$i18n.t('common.size'),
-                //     detail: '', // `${this.formatNumber(this.block.size)} ${this.$i18n.t('block.bytes')}`
-                // },
-                // {
-                //     title: this.$i18n.t('common.nonce'),
-                //     detail: '', // this.formatNumber(new BN(this.block.nonce).toNumber())
-                // },
-                // {
-                //     title: this.$i18n.t('block.state-root'),
-                //     detail: '', // this.block.stateRoot,
-                //     mono: true
-                // },
-                // {
-                //     title: this.$i18n.t('block.data'),
-                //     detail: '', // this.block.extraData,
-                //     mono: true
-                // },
-                //
-                // {
-                //     title: this.$i18n.t('gas.limit'),
-                //     detail: '', // this.formatNumber(this.block.gasLimit)
-                // },
-                // {
-                //     title: this.$i18n.t('gas.used'),
-                //     detail: '', // this.formatNumber(this.block.gasUsed)
-                // },
-                // {
-                //     title: this.$i18n.t('block.logs'),
-                //     detail: '', // this.block.logsBloom,
-                //     mono: true
-                // },
-                // {
-                //     title: this.$i18n.t('tx.root'),
-                //     detail: '', // this.block.transactionsRoot,
-                //     mono: true
-                // },
-                // {
-                //     title: this.$i18n.t('block.rcpt-root'),
-                //     detail: '', // this.block.receiptsRoot,
-                //     mono: true
-                // },
-                // {
-                //     title: `${this.$i18n.tc('uncle.name', 2)} ${this.$i18n.t('common.sha')}`,
-                //     detail: '', // this.block.sha3Uncles,
-                //     mono: true
-                // }
+                {
+                  title: this.$i18n.t('miner.total-rewards'),
+                  detail: `${this.rewards.value} ${this.rewards.unit}`,
+                  tooltip: `${this.rewards.tooltipText} ${this.$i18n.t('common.eth')}` || undefined
+                },
+                {
+                    title: this.$i18n.tc('tx.fee', 2),
+                    detail: '-', //'${this.transactionFees.value} ${this.transactionFees.unit}',
+                    // tooltip: '', // this.transactionFees.tooltipText ? `${this.transactionFees.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
+                },
+
+                {
+                    title: this.$i18n.t('uncle.reward'),
+                    detail: '-', // `${this.uncleRewards.value} ${this.uncleRewards.unit}`,
+                    // tooltip: '', // this.uncleRewards.tooltipText ? `${this.uncleRewards.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
+                },
+                {
+                    title: this.$i18n.tc('tx.name', 2),
+                    detail: '-', // this.transactionsCount
+                },
+                {
+                    title: this.$i18n.t('diff.name'),
+                    detail: '-', // this.formatNumber(new BN(this.block.difficulty).toNumber())
+                },
+                {
+                    title: this.$i18n.t('diff.total'),
+                    detail: '-', // this.formatNumber(new BN(this.block.totalDifficulty).toNumber())
+                },
+                {
+                    title: this.$i18n.t('common.size'),
+                    detail: '-', // `${this.formatNumber(this.block.size)} ${this.$i18n.t('block.bytes')}`
+                },
+                {
+                    title: this.$i18n.t('common.nonce'),
+                    detail: '-', // this.formatNumber(new BN(this.block.nonce).toNumber())
+                },
+                {
+                    title: this.$i18n.t('block.state-root'),
+                    detail: this.header.root, // this.block.stateRoot,
+                    mono: true
+                },
+                {
+                    title: this.$i18n.t('block.data'),
+                    detail: this.header.extra,
+                    mono: true
+                },
+
+                {
+                    title: this.$i18n.t('gas.limit'),
+                    detail: this.header.gasLimit, // this.formatNumber(this.block.gasLimit)
+                },
+                {
+                    title: this.$i18n.t('gas.used'),
+                    detail: this.header.gasUsed, // this.formatNumber(this.block.gasUsed)
+                },
+                {
+                    title: this.$i18n.t('block.logs'),
+                    detail: '-', // this.block.logsBloom,
+                    // mono: true
+                },
+                {
+                    title: this.$i18n.t('tx.root'),
+                    detail: this.header.td, // td = transaction?,
+                    // mono: true
+                },
+                {
+                    title: this.$i18n.t('block.rcpt-root'),
+                    detail: this.header.receiptRoot,
+                    mono: true
+                },
+                {
+                    title: `${this.$i18n.tc('uncle.name', 2)} ${this.$i18n.t('common.sha')}`,
+                    detail: this.header.uncleHash, // this.block.sha3Uncles,
+                    mono: true
+                }
             ]
         }
         return details
     }
     get rewards(): FormattedNumber | string {
-        return 'this.formatVariableUnitEthValue(new BN(this.header.summary.rewards.total))'
+      return this.formatVariableUnitEthValue(new BN(this.header.reward))
     }
     get uncleRewards(): FormattedNumber | string {
         return 'this.formatVariableUnitEthValue(new BN(this.header.summary.rewards.uncles))'
@@ -316,9 +318,6 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
      */
     emitBlockNumber(): void {
         // this.$emit('setBlockNumber', this.header.reward)
-    }
-    mounted() {
-      console.log('BlockDetail: ', this)
     }
 }
 </script>

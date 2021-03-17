@@ -70,7 +70,7 @@ import TableTxsRow from '@app/modules/txs/components/TableTxsRow.vue'
 import AppTableRowLoading from '@app/core/components/ui/AppTableRowLoading.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Footnote } from '@app/core/components/props'
-const SCROLLVIEW = 'max-height: 450px'
+const SCROLLVIEW = 'max-height: 850px'
 
 /*
   DEV NOTES:

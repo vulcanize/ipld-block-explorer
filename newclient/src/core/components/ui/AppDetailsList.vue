@@ -145,9 +145,6 @@ export default class AppDetailsList extends Vue {
     get hasMore(): boolean {
         return this.moreDetails.length > 0
     }
-    mounted() {
-      console.log('AppDetailsList: ', this.details)
-    }
 }
 </script>
 <style scoped lang="css">

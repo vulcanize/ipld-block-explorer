@@ -51,6 +51,9 @@ query AllBlocks {
             blockHash
             cid
             reward
+            blockByMhKey {
+                data
+            }
         }
         totalCount
     }
