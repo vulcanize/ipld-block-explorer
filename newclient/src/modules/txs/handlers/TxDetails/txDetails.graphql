@@ -22,6 +22,20 @@ query getTransactionByHash($hash: String!) {
     }
 }
 
+query getEthTransactionByHash($hash: String!) {
+    ethTransactionCidByHash(hash: $hash) {
+        nodes {
+            txHash
+            txData
+            src
+            dst
+            blockByMhKey {
+                data
+            }
+        }
+    }
+}
+
 query getTransactionById($hash: String!) {
     ethTransactionCidById(hash: $hash) {
         ...TxDetails
