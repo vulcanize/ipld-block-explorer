@@ -43,8 +43,8 @@ query allHeaders {
     }
 }
 
-query AllBlocks {
-    allEthHeaderCids {
+query AllBlocks($fromBlock: BigInt, $limit: Int) {
+    allHeaderCidsV2(maxBlock: $fromBlock, take: $limit) {
         nodes {
             id
             blockNumber
@@ -54,6 +54,12 @@ query AllBlocks {
             blockByMhKey {
                 data
             }
+        }
+        pageInfo {
+            startCursor
+            endCursor
+            hasNextPage
+            hasPreviousPage
         }
         totalCount
     }

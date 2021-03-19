@@ -58,7 +58,7 @@ import AppFootnotes from '@app/core/components/ui/AppFootnotes.vue'
 import TableBlocksRow from '@app/modules/blocks/components/TableBlocksRow.vue'
 import AppTableRowLoading from '@app/core/components/ui/AppTableRowLoading.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
-const SCROLLVIEW = 'max-height: 850px'
+const SCROLLVIEW = 'max-height: 450px'
 
 @Component({
     components: {
@@ -68,12 +68,6 @@ const SCROLLVIEW = 'max-height: 850px'
     }
 })
 export default class TableBlocks extends Vue {
-    /*
-    ===================================================================================
-      Props
-    ===================================================================================
-    */
-
     @Prop(Array) blockData!: any[]
     @Prop(Boolean) isLoading!: boolean
     @Prop(Number) maxItems!: number
@@ -81,12 +75,6 @@ export default class TableBlocks extends Vue {
     @Prop({ type: String, default: '' }) tableMessage!: string
     @Prop({ type: Boolean, default: false }) isScrollView!: boolean
     @Prop({ type: String, default: 'home' }) pageType!: string
-
-    /*
-    ===================================================================================
-      Computed Values
-    ===================================================================================
-    */
 
     get hasMessage(): boolean {
         return this.tableMessage != ''

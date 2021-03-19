@@ -223,7 +223,7 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.t('gas.used'),
-                    detail: this.formatNumber(this.header.gasUsed)
+                    detail: this.formatNumber(+this.header.gasUsed)
                 },
                 {
                     title: this.$i18n.t('block.logs'),
@@ -249,16 +249,16 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
         }
         return details
     }
-    get rewards(): FormattedNumber | string {
+    get rewards(): FormattedNumber {
       return this.formatVariableUnitEthValue(new BN(this.header.reward))
     }
     get uncleRewards(): FormattedNumber | string {
         return 'this.formatVariableUnitEthValue(new BN(this.header.summary.rewards.uncles))'
     }
-    get transactionFees(): FormattedNumber | string {
-        // return this.formatVariableUnitEthValue(new BN(this.header.gasLimit, 16).multipliedBy(new BN(this.header.gasUsed)))
-        // return 'this.formatVariableUnitEthValue(new BN(this.header.summary.rewards.txFees))'
-    }
+    // get transactionFees(): FormattedNumber | string {
+    //     // return this.formatVariableUnitEthValue(new BN(this.header.gasLimit, 16).multipliedBy(new BN(this.header.gasUsed)))
+    //     // return 'this.formatVariableUnitEthValue(new BN(this.header.summary.rewards.txFees))'
+    // }
     get transactionsCount(): string {
         // const failed = this.block.summary.txFail ? 1 : 2
         // const failedString = this.block.summary.txFail > 0 ? `, ${this.formatNumber(this.header.summary.txFail)} ${this.$tc('tx.failed', failed)}` : ''

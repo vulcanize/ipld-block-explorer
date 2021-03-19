@@ -1,19 +1,19 @@
 <template>
     <v-card color="white" flat class="pt-3 pb-3">
-<!--        <app-table-title :title="getTitle" :has-pagination="showPagination" :page-type="pageType" page-link="/blocks">-->
+        <app-table-title :title="getTitle" :has-pagination="showPagination" :page-type="pageType" page-link="/blocks">
 <!--            <template v-if="!isHome" #update>-->
 <!--                <notice-new-block @reload="setPage(0, true)" />-->
 <!--            </template>-->
-<!--            <template v-if="showPagination && !initialLoad" #pagination>-->
-<!--                <app-paginate-->
-<!--                    :total="totalPages"-->
-<!--                    :current-page="currentPage"-->
-<!--                    :has-input="true"-->
-<!--                    :has-first="true"-->
-<!--                    :has-last="true"-->
-<!--                    @newPage="setPage"-->
-<!--                /> </template-->
-<!--        ></app-table-title>-->
+            <template v-if="showPagination && !initialLoad" #pagination>
+                <app-paginate
+                    :total="totalPages"
+                    :current-page="currentPage"
+                    :has-input="false"
+                    :has-first="hasPrev"
+                    :has-last="hasNext"
+                    @newPage="setPage"
+                /> </template
+        ></app-table-title>
         <table-blocks :max-items="maxItems" :index="index" :is-loading="loading" :table-message="message" :block-data="blocks" :is-scroll-view="isHome" />
         <v-layout
             v-if="showPagination && !initialLoad"
@@ -35,7 +35,7 @@ import NoticeNewBlock from '@app/modules/blocks/components/NoticeNewBlock.vue'
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import BN from 'bignumber.js'
 import { getBlocksArrayByNumber, newBlockTable, allHeaders, AllBlocks } from './recentBlocks.graphql'
-import { allEthHeaderCids_allEthHeaderCids as TypeBlocks } from './apolloTypes/getBlocksArrayByNumber'
+import { allEthHeaderCids_allEthHeaderCids as TypeHeaders } from './apolloTypes/getBlocksArrayByNumber'
 import { ErrorMessageBlock } from '@app/modules/blocks/models/ErrorMessagesForBlock'
 import { excpInvariantViolation } from '@app/apollo/exceptions/errorExceptions'
 
@@ -45,24 +45,24 @@ interface BlockMap {
 
 @Component({
     components: {
-        // AppTableTitle,
-        // AppPaginate,
+        AppTableTitle,
+        AppPaginate,
         // NoticeNewBlock,
         TableBlocks
     },
     apollo: {
-        allEthHeaderCids: {
+        allHeaderCidsV2: {
             // query: allHeaders,
             query: AllBlocks,
-            // variables() {
-            //     return {
-            //         limit: this.maxItems
-            //     }
-            // },
-            // fetchPolicy: 'network-only',
+            variables() {
+                return {
+                    limit: this.maxItems
+                }
+            },
+            fetchPolicy: 'network-only',
             // subscribeToMore: [
             //     {
-            //         document: newBlockTable,
+            //         document: newBlockTable,fromBlock
             //         updateQuery: (previousResult, { subscriptionData }) => {
             //             try {
             //                 if (previousResult && subscriptionData.data.newBlockFeed) {
@@ -87,14 +87,18 @@ interface BlockMap {
             // ],
 
             result({ data }) {
-                if (data && data.allEthHeaderCids && data.allEthHeaderCids.nodes) {
+                if (data && data.allHeaderCidsV2 && data.allHeaderCidsV2.nodes) {
+                    // console.log('allHeaderCidsV2 ', data.allHeaderCidsV2)
                     this.emitErrorState(false)
                     if (this.initialLoad) {
-                        // this.startBlock = data.getBlocksArrayByNumber[0].number
+                        this.startBlock = data.allHeaderCidsV2.nodes[0].blockNumber
                         this.index = 0
-                        // this.totalPages = Math.ceil(new BN(this.startBlock + 1).div(this.maxItems).toNumber())
+                        this.totalPages = Math.ceil(new BN(this.startBlock + 1).div(this.maxItems).toNumber())
+                        // this.totalPages = Math.ceil(data.allHeaderCidsV2.totalCount / this.maxItems)
                         this.initialLoad = false
                     }
+                    this.hasPrev = data.allHeaderCidsV2.pageInfo.hasNextPage
+                    this.hasNext = data.allHeaderCidsV2.pageInfo.hasPreviousPage
                     // if (this.pageType === 'home') {
                     //     if (this.getBlocksArrayByNumber[0].number - this.getBlocksArrayByNumber[1].number > 1) {
                     //         this.$apollo.queries.getBlocksArrayByNumber.refetch()
@@ -115,17 +119,19 @@ export default class RecentBlocks extends Vue {
     initialLoad = true
     hasError = false
     syncing?: boolean = false
-    allEthHeaderCids!: TypeBlocks
+    hasPrev?: boolean = false
+    hasNext?: boolean = false
+    allHeaderCidsV2!: TypeHeaders
     indexedBlocks: BlockMap = {}
     index = 0
     totalPages = 0
     startBlock!: number
     get blocks(): any {
-        // if (this.indexedBlocks && this.indexedBlocks[this.index]) {
-        //     return this.indexedBlocks[this.index]
-        // }
+        if (this.indexedBlocks && this.indexedBlocks[this.index]) {
+            return this.indexedBlocks[this.index]
+        }
         // return this.AllBlocks.nodes ? this.AllBlocks.nodes : []
-        return (this.allEthHeaderCids || {}).nodes || []
+        return (this.allHeaderCidsV2 || {}).nodes || []
     }
 
     get message() {
@@ -147,7 +153,7 @@ export default class RecentBlocks extends Vue {
         if (this.isHome) {
             return this.initialLoad
         }
-        return this.$apollo.queries.allEthHeaderCids.loading
+        return this.$apollo.queries.allHeaderCidsV2.loading
     }
     get isHome(): boolean {
         return this.pageType === 'home'
@@ -159,43 +165,46 @@ export default class RecentBlocks extends Vue {
         return !this.initialLoad && !this.isHome && this.startBlock - this.maxItems > 0
     }
     async setPage(page: number, reset: boolean = false): Promise<boolean> {
-        // try {
-        //     this.index = page
-        //     if (reset) {
-        //         this.indexedBlocks = {}
-        //         this.initialLoad = true
-        //         await this.$apollo.queries.getBlocksArrayByNumber.refetch()
-        //     } else {
-        //         const from = this.startBlock - this.maxItems * this.index
-        //         if (from >= 0 && !this.indexedBlocks[this.index]) {
-        //             await this.$apollo.queries.getBlocksArrayByNumber.fetchMore({
-        //                 variables: {
-        //                     fromBlock: from,
-        //                     limit: this.maxItems
-        //                 },
-        //                 updateQuery: (previousResult, { fetchMoreResult }) => {
-        //                     return fetchMoreResult
-        //                 }
-        //             })
-        //         }
-        //     }
-        //     return true
-        // } catch (e) {
-        //     const newE = JSON.stringify(e)
-        //     if (!newE.toLowerCase().includes(excpInvariantViolation)) {
-        //         throw new Error(newE)
-        //     }
-        //     return false
-        // }
-        return false
+        try {
+            this.index = page
+            if (reset) {
+                this.indexedBlocks = {}
+                this.initialLoad = true
+                await this.$apollo.queries.allHeaderCidsV2.refetch()
+            } else {
+                // const from = this.startBlock - this.maxItems * this.index
+                const from = this.allHeaderCidsV2.nodes[9].blockNumber
+                if (from >= 0 && !this.indexedBlocks[this.index]) {
+                    await this.$apollo.queries.allHeaderCidsV2.fetchMore({
+                        variables: {
+                            fromBlock: from,
+                            limit: this.maxItems
+                        },
+                        updateQuery: (previousResult, { fetchMoreResult }) => {
+                            return fetchMoreResult
+                        }
+                    })
+                }
+            }
+            return true
+        } catch (e) {
+            const newE = JSON.stringify(e)
+            if (!newE.toLowerCase().includes(excpInvariantViolation)) {
+                throw new Error(newE)
+            }
+            return false
+        }
+        // return false
     }
     emitErrorState(val: boolean): void {
         this.hasError = val
         this.$emit('errorBlocksList', this.hasError, ErrorMessageBlock.list)
     }
-    @Watch('allEthHeaderCids', { deep: true })
-    onGetHeadersChanged(val: TypeBlocks, oldVal: TypeBlocks) {
+    @Watch('allHeaderCidsV2', { deep: true })
+    onGetHeadersChanged(val: TypeHeaders, oldVal: TypeHeaders) {
         if ((val || {}).nodes != (oldVal || {}).nodes) {
+            // console.log('$Set: ', this.index, val.nodes)
+            // console.log('indexedBlocks: ', this.indexedBlocks)
             this.$set(this.indexedBlocks, this.index, val.nodes)
         }
     }
