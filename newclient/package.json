@@ -53,7 +53,6 @@
         "number-formatter": "^1.2.0",
         "rxjs": "^6.5.5",
         "store": "^2.0.12",
-        "subscriptions-transport-ws": "^0.9.16",
         "vue": "^2.6.11",
         "vue-apollo": "^3.0.3",
         "vue-chartjs": "^3.5.0",
