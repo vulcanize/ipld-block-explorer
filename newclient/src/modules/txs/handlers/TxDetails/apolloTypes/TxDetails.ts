@@ -24,4 +24,10 @@ export interface TxDetails {
   value: string;
   replacedBy: string | null;
   contractAddress: string | null;
+  txHash?: string
+  src?: string
+  dst?: string
+  amount?: string
+  gasLimit?: string
+  price?: string
 }

@@ -19,8 +19,8 @@ query getBlockTransfers($_number: Int) {
     }
 }
 
-query getTransaction {
-    allEthTransactionCids {
+query getTransactions($last: Int, $before: Cursor) {
+    allEthTransactionCids(last: $last, before: $before) {
         nodes {
             id
             txHash
@@ -29,9 +29,47 @@ query getTransaction {
             ethHeaderCidByHeaderId {
                 blockNumber
                 timestamp
+                blockByMhKey {
+                    data
+                }
             }
         }
+        pageInfo {
+            endCursor
+            startCursor
+            hasPreviousPage
+            hasNextPage
+        }
         totalCount
+    }
+}
+
+subscription newTransactions {
+    listen(topic: "newBlock") {
+        query {
+            allEthTransactionCids(first: 1) {
+                nodes {
+                    id
+                    txHash
+                    dst
+                    src
+                    ethHeaderCidByHeaderId {
+                        blockNumber
+                        timestamp
+                        blockByMhKey {
+                            data
+                        }
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    startCursor
+                    hasPreviousPage
+                    hasNextPage
+                }
+                totalCount
+            }
+        }
     }
 }
 

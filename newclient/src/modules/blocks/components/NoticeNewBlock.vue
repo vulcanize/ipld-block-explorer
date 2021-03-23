@@ -13,18 +13,8 @@ import { TranslateResult } from 'vue-i18n'
 
 @Component
 export default class NoticeNewBlock extends Mixins(NewBlockSubscription) {
-    /*
-    ===================================================================================
-      Props:
-    ===================================================================================
-  */
     @Prop({ type: String, default: 'block' }) pageId!: string // Ids: block, uncles, txs, pending
 
-    /*
-    ===================================================================================
-      Data:
-    ===================================================================================
-  */
     display: boolean = false
     countTotal: number = 0
     newTxsCount: number = 0
@@ -32,25 +22,12 @@ export default class NoticeNewBlock extends Mixins(NewBlockSubscription) {
     validID = ['block', 'tx', 'pending', 'uncle']
     valueString: number = 0
 
-    /*
-    ===================================================================================
-      Lifecycle:
-    ===================================================================================
-  */
-
     mounted() {
         //Check for valid ids:
         if (!this.validID.includes(this.pageId)) {
             throw new Error('Invalid pageId for notice new block component: ' + this.pageId)
         }
     }
-
-    /*
-    ===================================================================================
-      Watch:
-    ===================================================================================
-  */
-
     @Watch('newBlockNumber')
     onNewBlockNumberChange(newVal: number, oldVal: number): void {
         if (this.pageId === this.validID[0] && this.newBlockNumber) {
@@ -68,11 +45,6 @@ export default class NoticeNewBlock extends Mixins(NewBlockSubscription) {
             this.valueString = this.newUncles
         }
     }
-    /*
-    ===================================================================================
-      Methods:
-    ===================================================================================
-  */
     /**
      * Reloads everything and emit's reload to parent
      */
@@ -83,13 +55,6 @@ export default class NoticeNewBlock extends Mixins(NewBlockSubscription) {
         this.newTxsCount = 0
         this.newUncles = 0
     }
-
-    /*
-    ===================================================================================
-      Computed:
-    ===================================================================================
-  */
-
     get buttonText(): String {
         const plural = this.countTotal === 1 ? 1 : 2
         const message = `message.update.${this.pageId}`

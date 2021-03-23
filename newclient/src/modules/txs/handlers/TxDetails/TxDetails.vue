@@ -20,7 +20,7 @@ import AppDetailsList from '@app/core/components/ui/AppDetailsList.vue'
 import TxDetailsTitle from '@app/modules/txs/components/TxDetailsTitle.vue'
 import { Detail } from '@app/core/components/props'
 import { Mixins, Component, Prop } from 'vue-property-decorator'
-import { getTransactionByHash, transactionEvent } from './txDetails.graphql'
+import { getTransactionByHash, transactionEvent, getEthTransactionByHash } from './txDetails.graphql'
 import { TxDetails as TxDetailsType } from './apolloTypes/TxDetails'
 import { NumberFormatMixin } from '@app/core/components/mixins/number-format.mixin'
 import { FormattedNumber } from '@app/core/helper/number-format-helper'
@@ -28,6 +28,7 @@ import BN from 'bignumber.js'
 import { ErrorMessageTx, TxStatus } from '@app/modules/txs/models/ErrorMessagesForTx'
 import { FormattedNumberUnit } from '@app/core/helper/number-format-helper'
 import { excpTxDoNotExists } from '@app/apollo/exceptions/errorExceptions'
+import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
 
 @Component({
     components: {
@@ -35,18 +36,47 @@ import { excpTxDoNotExists } from '@app/apollo/exceptions/errorExceptions'
         TxDetailsTitle
     },
     apollo: {
-        transaction: {
-            query: getTransactionByHash,
+        // transaction: {
+        //     query: getEthTransactionByHash,
+        //     variables() {
+        //         return { hash: this.txRef }
+        //     },
+        //     fetchPolicy: 'cache-and-network',
+        //     update: data => data.getEthTransactionByHash,
+        //     result({ data }) {
+        //         console.log('Result: ', data)
+        //         if (data && data.getEthTransactionByHash) {
+        //             // if (!this.isReplaced && this.txStatus === 'pending' && !this.subscribed) {
+        //             //     this.startSubscription()
+        //             // }
+        //             this.getEthTransactionByHash = data.ethTransactionCidByHash.nodes[0]
+        //             this.emitErrorState(false)
+        //         }
+        //     },
+        //     error(error) {
+        //         const newError = JSON.stringify(error.message)
+        //         if (newError.toLowerCase().includes(excpTxDoNotExists)) {
+        //             this.emitErrorState(true, true)
+        //         } else {
+        //             this.emitErrorState(true)
+        //         }
+        //     }
+        // },
+        ethTransactionCidByHash: {
+            query: getEthTransactionByHash,
             variables() {
-                return { hash: this.txRef }
+                return {hash: this.txRef}
             },
-            fetchPolicy: 'cache-and-network',
-            update: data => data.getTransactionByHash,
-            result({ data }) {
-                if (data && data.getTransactionByHash) {
-                    if (!this.isReplaced && this.txStatus === 'pending' && !this.subscribed) {
-                        this.startSubscription()
-                    }
+            fetchPolicy: 'network-only',
+            update: data => data.ethTransactionCidByHash,
+            result({data}) {
+                if (data && data.ethTransactionCidByHash) {
+                    // if (!this.isReplaced && this.txStatus === 'pending' && !this.subscribed) {
+                    //     this.startSubscription()
+                    // }
+                    const decodedData = decodeTransactionData(data.ethTransactionCidByHash.nodes[0].blockByMhKey.data)
+                    console.log('decodedData: ', decodedData)
+                    this.ethTransaction = {...data.ethTransactionCidByHash.nodes[0], ...decodedData}
                     this.emitErrorState(false)
                 }
             },
@@ -62,29 +92,12 @@ import { excpTxDoNotExists } from '@app/apollo/exceptions/errorExceptions'
     }
 })
 export default class TxDetails extends Mixins(NumberFormatMixin) {
-    /*
-  ===================================================================================
-    Props
-  ===================================================================================
-  */
-
     @Prop({ type: String }) txRef!: string
-
-    /*
-  ===================================================================================
-    Initial Data
-  ===================================================================================
-  */
-
     hasError = false
     transaction!: TxDetailsType
+    ethTransactionCidByHash!: TxDetailsType
+    ethTransaction!: TxDetailsType
     subscribed = false
-
-    /*
-  ===================================================================================
-    Computed Values
-  ===================================================================================
-  */
 
     /**
      * Create properly-formatted title from tokenDetails
@@ -135,77 +148,81 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
                 }
             ]
         } else {
-            const isContractCreation = typeof this.transaction.contractAddress !== 'string'
+            const isContractCreation = "typeof this.transaction.contractAddress !== 'string'"
+            const tsx = this.ethTransaction
+            console.log('Tsx: ', tsx)
             details = [
                 {
                     title: this.$i18n.t('common.hash'),
-                    detail: this.transaction.hash,
+                    detail: tsx.txHash, // this.transaction.hash,
                     copy: true,
                     mono: true
                 },
                 {
                     title: this.$i18n.t('tx.from'),
-                    detail: this.transaction.from,
+                    detail: tsx.src, // this.transaction.from,
                     copy: true,
-                    link: `/address/${this.transaction.from}`,
+                    // link: `/address/${this.transaction.from}`,
                     mono: true,
                     toChecksum: true
                 },
                 {
                     title: isContractCreation ? this.$i18n.t('tx.to').toString() : this.$t('contract.creation').toString(),
-                    detail: isContractCreation ? this.transaction.to : this.transaction.contractAddress,
-                    copy: this.transaction.to !== null,
-                    link: this.transaction.to !== null ? `/address/${this.transaction.to!}` : `/address/${this.transaction.contractAddress}`,
-                    mono: this.transaction.to !== null,
+                    detail: tsx.dst, // isContractCreation ? this.transaction.to : this.transaction.contractAddress,
+                    copy: tsx.dst !== undefined,
+                    // link: this.transaction.to !== null ? `/address/${this.transaction.to!}` : `/address/${this.transaction.contractAddress}`,
+                    // mono: this.transaction.to !== null,
                     toChecksum: true
                 },
                 {
                     title: this.$i18n.t('common.amount'),
+                    // detail: tsx.value // `${this.txAmount.value} ${this.$t(`common.${this.txAmount.unit}`)}`,
                     detail: `${this.txAmount.value} ${this.$t(`common.${this.txAmount.unit}`)}`,
-                    tooltip: this.txAmount.tooltipText ? `${this.txAmount.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
+                    // tooltip: this.txAmount.tooltipText ? `${this.txAmount.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
                 },
 
                 {
-                    title: this.$i18n.tc(this.pendingString, 1),
+                    title: this.$i18n.t('tx.fee'),
                     detail: `${this.txFee.value} ${this.$t(`common.${this.txFee.unit}`)}`,
-                    tooltip: this.txFee.tooltipText ? `${this.txFee.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
+                    // tooltip: this.txFee.tooltipText ? `${this.txFee.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
                 },
                 {
                     title: this.$i18n.t('tx.status'),
-                    detail: `${this.$i18n.tc('tx.' + this.txStatus, 1)}`
+                    detail: '-' // `${this.$i18n.tc('tx.' + this.txStatus, 1)}`
                 },
                 {
                     title: this.$i18n.t('gas.limit'),
-                    detail: this.formatNumber(new BN(this.transaction.gas).toNumber())
+                    detail: tsx.gasLimit // this.formatNumber(new BN(this.transaction.gas).toNumber())
                     // tooltip: this.transaction.gasFormatted.tooltipText ? `${this.transaction.gasFormatted.tooltipText}` : undefined
                 },
 
                 {
                     title: this.$i18n.t('gas.price'),
+                    // detail: tsx.gasPrice // `${this.gasPrice.value} ${this.$t(`common.${this.gasPrice.unit}`)}`,
                     detail: `${this.gasPrice.value} ${this.$t(`common.${this.gasPrice.unit}`)}`,
-                    tooltip: this.gasPrice.tooltipText ? `${this.gasPrice.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
+                    // tooltip: this.gasPrice.tooltipText ? `${this.gasPrice.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
                 },
                 {
                     title: this.$i18n.t('gas.used'),
-                    detail: this.formatNumber(new BN(this.transaction.gasUsed || 0).toNumber()) // TODO genesis block txs can have no receipt
+                    detail: this.formatNumber(new BN(tsx.gas || 0).toNumber())
                     // tooltip: receipt && receipt.gasUsedFormatted.tooltipText ? `${receipt.gasUsedFormatted.tooltipText}` : undefined
                 },
                 {
                     title: this.$i18n.t('common.nonce'),
-                    detail: this.transaction.nonce
+                    detail: tsx.nonce
                     // tooltip: this.transaction.nonce.tooltipText ? `${this.transaction.nonce.tooltipText}` : undefined
                 },
 
                 {
                     title: this.$i18n.t('tx.input'),
-                    detail: this.transaction.input
+                    detail: tsx.input
                     // txInput: this.inputFormatted
                 }
             ]
             if (this.txStatus !== 'pending' && !this.isReplaced) {
                 const time = {
                     title: this.$i18n.t('common.timestmp'),
-                    detail: this.transaction.timestamp !== null ? new Date(this.transaction.timestamp * 1e3).toString() : ''
+                    detail: '-' // this.transaction.timestamp !== null ? new Date(this.transaction.timestamp * 1e3).toString() : ''
                 }
                 details.splice(1, 0, time)
             }
@@ -213,21 +230,21 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
             if (this.txStatus !== 'pending' && !this.isReplaced) {
                 const block = {
                     title: this.$i18n.t('block.number'),
-                    detail: this.formatNumber(this.transaction.blockNumber || 0),
-                    link: `/block/number/${this.transaction.blockNumber}`
+                    detail: '-' // this.formatNumber(this.transaction.blockNumber || 0),
+                    // link: `/block/number/${this.transaction.blockNumber}`
                 }
                 details.splice(0, 0, block)
             }
-            if (this.transaction.replacedBy !== null) {
-                const replaced = {
-                    title: this.$i18n.t('tx.replaced'),
-                    detail: this.transaction.replacedBy,
-                    copy: true,
-                    link: this.transaction.replacedBy,
-                    mono: true
-                }
-                details.splice(1, 0, replaced)
-            }
+            // if (this.transaction.replacedBy !== null) {
+            //     const replaced = {
+            //         title: this.$i18n.t('tx.replaced'),
+            //         detail: this.transaction.replacedBy,
+            //         copy: true,
+            //         link: this.transaction.replacedBy,
+            //         mono: true
+            //     }
+            //     details.splice(1, 0, replaced)
+            // }
         }
 
         return details
@@ -239,7 +256,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      * @return {Boolean}
      */
     get isLoading(): boolean | undefined {
-        return this.$apollo.queries.transaction.loading || this.hasError
+        return this.$apollo.queries.ethTransactionCidByHash.loading || this.hasError
     }
     /**
      * Formats the transaction value to ETH.
@@ -247,7 +264,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      * @return {FormattedNumber}
      */
     get txAmount(): FormattedNumber {
-        return this.formatVariableUnitEthValue(new BN(this.transaction.value))
+        return this.formatVariableUnitEthValue(new BN(this.ethTransaction.value, 16))
     }
     /**
      * Formats the gas price value to gwei.
@@ -255,7 +272,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      * @return {FormattedNumber}
      */
     get gasPrice(): FormattedNumber {
-        return this.formatNonVariableGWeiValue(new BN(this.transaction.gasPrice))
+        return this.formatNonVariableGWeiValue(new BN(this.ethTransaction.gasPrice))
     }
     /**
      * Gets the tx status.
@@ -299,47 +316,42 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      * @return {FormattedNumber}
      */
     get txFee(): FormattedNumber {
-        if (this.transaction && this.transaction.gasUsed) {
-            const price = new BN(this.transaction.gasPrice)
-            const used = new BN(this.transaction.gasUsed)
-            const fee = price.times(used)
+        if (this.ethTransaction && this.ethTransaction.gas && this.ethTransaction.gasPrice) {
+            // const price = new BN(this.ethTransaction.gasPrice)
+            // const used = new BN(this.ethTransaction.gas)
+            // const fee = price.times(used)
+            // return this.formatVariableUnitEthValue(fee)
+            const fee = new BN(this.ethTransaction.gasPrice, 16).multipliedBy(new BN(this.ethTransaction.gas, 16))
             return this.formatVariableUnitEthValue(fee)
         }
-        if (!this.isReplaced && this.txStatus === 'pending') {
-            const fee = new BN(this.transaction.gas).multipliedBy(this.transaction.gasPrice)
-            return this.formatVariableUnitEthValue(fee)
-        }
+        // if (!this.isReplaced && this.txStatus === 'pending') {
+        //     // const fee = new BN(this.transaction.gas).multipliedBy(this.transaction.gasPrice)
+        //     return 'this.formatVariableUnitEthValue(fee)'
+        // }
         return { value: '0', unit: FormattedNumberUnit.ETH }
     }
 
-    get pendingString(): string {
-        return !this.isReplaced && this.txStatus === 'pending' ? 'tx.estimated-fee' : 'tx.fee'
-    }
-    /*
-    ===================================================================================
-     Methods
-    ===================================================================================
-    */
     /**
      * Start apollo subscription
      */
     startSubscription(): void {
-        const _hash = this.transaction.hash
-        const observer = this.$apollo.subscribe({
-            query: transactionEvent,
-            variables: {
-                hash: _hash
-            }
-        })
-        const a = observer.subscribe({
-            next: data => {
-                a.unsubscribe()
-                this.$apollo.queries.transaction.refetch()
-            },
-            error: error => {
-                this.emitErrorState(true)
-            }
-        })
+        // console.log('Subscription ', this)
+        // const _hash = this.transaction.hash
+        // const observer = this.$apollo.subscribe({
+        //     query: transactionEvent,
+        //     variables: {
+        //         hash: _hash
+        //     }
+        // })
+        // const a = observer.subscribe({
+        //     next: data => {
+        //         a.unsubscribe()
+        //         this.$apollo.queries.transaction.refetch()
+        //     },
+        //     error: error => {
+        //         this.emitErrorState(true)
+        //     }
+        // })
     }
     /**
      * Emit error to Sentry

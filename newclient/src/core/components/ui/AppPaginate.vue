@@ -29,11 +29,6 @@ import BigNumber from 'bignumber.js'
 
 @Component
 export default class AppPaginate extends Mixins(NumberFormatMixin) {
-    /*
-  ===================================================================================
-    Props
-  ===================================================================================
-  */
 
     @Prop(Number) total!: number
     @Prop(Number) currentPage!: number
@@ -41,22 +36,10 @@ export default class AppPaginate extends Mixins(NumberFormatMixin) {
     @Prop({ type: Boolean, default: true }) hasLast!: boolean
     @Prop({ type: Boolean, default: true }) hasInput!: boolean
 
-    /*
-  ===================================================================================
-    Initial Data
-  ===================================================================================
-  */
-
     validClass = 'center-input body-1 secondary--text'
     invalidClass = 'center-input body-1 error--text'
     isError = false
     pageDisplayUpdateTimeout: number | null = null // Timeout object to update page with override of pageDisplay input model
-
-    /*
-  ===================================================================================
-    Methods
-  ===================================================================================
-  */
 
     /**
      * Emit event to parent compoent/view with updated page number.
@@ -128,12 +111,6 @@ export default class AppPaginate extends Mixins(NumberFormatMixin) {
             this.setPage(desiredPage)
         }, 1000)
     }
-
-    /*
-  ===================================================================================
-    Computed Values
-  ===================================================================================
-  */
 
     /**
      * Transform the "zero-based" value of this.page into

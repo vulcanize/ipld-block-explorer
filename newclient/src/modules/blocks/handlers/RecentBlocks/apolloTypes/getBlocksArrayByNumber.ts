@@ -21,20 +21,22 @@ export interface getBlocksArrayByNumber_getBlocksArrayByNumber {
   rewards: getBlocksArrayByNumber_getBlocksArrayByNumber_rewards;
   txFail: number;
 }
-export interface allEthHeaderCids_allEthHeaderCids {
-  __typename: "allEthHeaderCids";
-  nodes: {
-    id: number;
-    blockNumber: string;
-    blockHash: string;
-    reward: string;
-    cid: string;
-    blockByMhKey: {
-      data: string;
-    }
-    receiptRoot: string;
-    td: string;
+export interface EthHeaderCidsBlock {
+  id: number;
+  blockNumber: string;
+  blockHash: string;
+  reward: string;
+  cid: string;
+  blockByMhKey: {
+    data: string;
   }
+  receiptRoot: string;
+  td: string;
+}
+
+export interface allEthHeaderCids_allEthHeaderCids {
+  __typename: "EthHeaderCidsConnection";
+  nodes: EthHeaderCidsBlock[];
   totalCount: number;
 }
 

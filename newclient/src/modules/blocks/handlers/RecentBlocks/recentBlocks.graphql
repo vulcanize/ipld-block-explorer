@@ -43,8 +43,8 @@ query allHeaders {
     }
 }
 
-query AllBlocks {
-    allEthHeaderCids {
+query AllBlocks($fromBlock: BigInt, $limit: Int) {
+    allHeaderCidsV2(maxBlock: $fromBlock, take: $limit) {
         nodes {
             id
             blockNumber
@@ -55,6 +55,38 @@ query AllBlocks {
                 data
             }
         }
+        pageInfo {
+            startCursor
+            endCursor
+            hasNextPage
+            hasPreviousPage
+        }
         totalCount
+    }
+}
+
+subscription newBlocks {
+    listen(topic: "newBlock") {
+        query {
+            allHeaderCidsV2(first: 1) {
+                totalCount
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                    hasPreviousPage
+                    startCursor
+                }
+                nodes {
+                    id
+                    blockNumber
+                    blockHash
+                    cid
+                    reward
+                    blockByMhKey {
+                        data
+                    }
+                }
+            }
+        }
     }
 }

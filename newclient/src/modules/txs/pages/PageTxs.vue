@@ -18,7 +18,7 @@ import { Crumb } from '@app/core/components/props'
 import { Vue, Component } from 'vue-property-decorator'
 import { ErrorMessageBlock } from '@app/modules/blocks/models/ErrorMessagesForBlock'
 
-const MAX_ITEMS = 50
+const MAX_ITEMS = 3
 
 @Component({
     components: {

@@ -33,4 +33,16 @@ export interface HeaderDetails {
   blockNumber: string;
   reward: string;
   timestamp: string;
+  time: string;
+  address: string;
+  gasUsed: string | number;
+  txRoot: string;
+  receiptRoot: string;
+  uncleHash: string;
+  extra: string;
+  stateRoot: string;
+  nonce: string;
+  transactionsCount: string;
+  difficulty: string;
+  gasLimit: string;
 }

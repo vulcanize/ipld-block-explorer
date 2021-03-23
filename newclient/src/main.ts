@@ -6,7 +6,6 @@ import { HttpLink } from 'apollo-link-http'
 import { WebSocketLink } from 'apollo-link-ws'
 import { getMainDefinition } from 'apollo-utilities'
 import VueApollo from 'vue-apollo'
-import { SubscriptionClient } from 'subscriptions-transport-ws'
 import { onError } from 'apollo-link-error'
 import { OpenSeaClient } from './apollo/opensea/osClient'
 import { FavAddrClient } from './apollo/favorite-addresses/favAddrClient'
@@ -35,10 +34,13 @@ Vue.config.productionTip = false
 const httpLink = new HttpLink({
   uri: configs.APOLLO_HTTP,
 })
-const wsHost = configs.APOLLO_WS
-// @ts-ignore
-const subscriptionClient = new SubscriptionClient(wsHost, { lazy: true, reconnect: true }, null, [])
-const wsLink = new WebSocketLink(subscriptionClient)
+const wsHost = configs.APOLLO_WS || ''
+const wsLink = new WebSocketLink({
+    uri: wsHost,
+    options: {
+        reconnect: true
+    }
+})
 const onErrorLink = onError(({ graphQLErrors }) => {
     if (graphQLErrors) {
         graphQLErrors.map(({ message, locations, path }) => {

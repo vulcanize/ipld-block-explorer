@@ -41,11 +41,11 @@
           Latest Txs
         =====================================================================================
         -->
-<!--        <v-layout row wrap justify-center mb-4>-->
-<!--            <v-flex xs12>-->
-<!--                <home-txs :max-items="maxItems" :new-block="newBlockNumber" page-type="home" @errorTxs="setError" />-->
-<!--            </v-flex>-->
-<!--        </v-layout>-->
+        <v-layout row wrap justify-center mb-4>
+            <v-flex xs12>
+                <home-txs :max-items="maxItems" :new-block="newBlockNumber" page-type="home" @errorTxs="setError" />
+            </v-flex>
+        </v-layout>
     </v-container>
 </template>
 
@@ -70,7 +70,7 @@ const MAX_ITEMS = 10
         AppMessage,
         // BlockStats,
         RecentBlocks,
-        // HomeTxs,
+        HomeTxs,
         // HomeGasPriceChart,
         // HomeTxChart
     }
