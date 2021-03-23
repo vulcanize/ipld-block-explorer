@@ -44,6 +44,35 @@ query getTransactions($last: Int, $before: Cursor) {
     }
 }
 
+subscription newTransactions {
+    listen(topic: "newBlock") {
+        query {
+            allEthTransactionCids(first: 1) {
+                nodes {
+                    id
+                    txHash
+                    dst
+                    src
+                    ethHeaderCidByHeaderId {
+                        blockNumber
+                        timestamp
+                        blockByMhKey {
+                            data
+                        }
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    startCursor
+                    hasPreviousPage
+                    hasNextPage
+                }
+                totalCount
+            }
+        }
+    }
+}
+
 query getAllTxs($_limit: Int, $_nextKey: String) {
     getAllEthTransfers(limit: $_limit, nextKey: $_nextKey) {
         ...TxSummary

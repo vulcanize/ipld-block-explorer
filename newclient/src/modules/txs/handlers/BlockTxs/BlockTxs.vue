@@ -1,9 +1,9 @@
 <template>
     <v-card color="white" flat class="pt-3 pb-2">
         <app-table-title :title="getTitle" :has-pagination="showPagination" :page-type="pageType" page-link="/txs">
-<!--            <template v-if="!isHome && !isBlock" #update>-->
-<!--                <app-new-update :text="$t('message.update.txs')" :update-count="newMinedTransfers" :hide-count="true" @reload="setPage(0, true)" />-->
-<!--            </template>-->
+            <template v-if="!isHome && !isBlock" #update>
+                <app-new-update :text="$t('message.update.txs')" :update-count="newMinedTransfers" :hide-count="true" @reload="setPage(0, true)" />
+            </template>
             <template v-if="showPagination && !initialLoad" #pagination>
                 <app-paginate
                     v-if="isBlock"
@@ -46,7 +46,7 @@ import AppNewUpdate from '@app/core/components/ui/AppNewUpdate.vue'
 import TableTxs from '@app/modules/txs/components/TableTxs.vue'
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import BN from 'bignumber.js'
-import { getBlockTransfers, getAllTxs, newTransfersCompleteFeed, getTransactions } from './queryTransfers.graphql'
+import { getBlockTransfers, getAllTxs, newTransfersCompleteFeed, getTransactions, newTransactions } from './queryTransfers.graphql'
 import {
     getBlockTransfers_getBlockTransfers as TypeBlockTransfers,
     getBlockTransfers_getBlockTransfers_transfers as TypeTransfers,
@@ -120,28 +120,31 @@ import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
         //         this.emitErrorState(true)
         //     }
         // },
-        // $subscribe: {
-        //     newTransfersCompleteFeed: {
-        //         query: newTransfersCompleteFeed,
-        //
-        //         skip() {
-        //             return this.isBlock
-        //         },
-        //         result({ data }) {
-        //             if (data.newTransfersCompleteFeed.type === TransferType.ETH) {
-        //                 if (this.isHome) {
-        //                     this.$apollo.queries.getAllEthTransfers.refresh()
-        //                     this.emitErrorState(false)
-        //                 } else {
-        //                     this.newMinedTransfers++
-        //                 }
-        //             }
-        //         },
-        //         error(error) {
-        //             this.emitErrorState(true)
-        //         }
-        //     }
-        // }
+        $subscribe: {
+            newTransactions: {
+                query: newTransactions,
+                // skip() {
+                //     return this.isBlock
+                // },
+                result({ data }) {
+                    if (data.listen.query.allEthTransactionCids.nodes.length) {
+                        if (this.isHome) {
+                            const variables = {
+                                last: this.maxItems,
+                                before: null
+                            }
+                            this.$apollo.queries.allEthTransactionCids.refetch(variables)
+                            this.emitErrorState(false)
+                        } else {
+                            this.newMinedTransfers++
+                        }
+                    }
+                },
+                error(error) {
+                    this.emitErrorState(error)
+                }
+            }
+        }
     }
 })
 export default class BlockTxs extends Vue {
@@ -237,7 +240,11 @@ export default class BlockTxs extends Vue {
                 if (!this.isHome && !this.isBlock) {
                     this.newMinedTransfers = 0
                 }
-                await this.$apollo.queries.allEthTransactionCids.refetch()
+                const variables = {
+                    last: this.maxItems,
+                    before: null
+                }
+                await this.$apollo.queries.allEthTransactionCids.refetch(variables)
             } else {
                 if (!this.isBlock && page > this.isEnd && this.hasMore) {
                     await this.$apollo.queries.allEthTransactionCids.fetchMore({
