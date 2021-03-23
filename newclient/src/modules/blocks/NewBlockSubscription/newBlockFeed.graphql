@@ -1,8 +1,11 @@
 subscription newBlockFeed {
-    newBlockFeed {
-        number
-        miner
-        txCount
-        timestamp
+    listen(topic: "newBlock") {
+        query {
+            allHeaderCidsV2(first: 3) {
+                nodes {
+                    timestamp
+                }
+            }
+        }
     }
 }

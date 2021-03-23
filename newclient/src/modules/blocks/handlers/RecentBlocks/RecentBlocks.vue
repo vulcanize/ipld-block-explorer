@@ -1,9 +1,9 @@
 <template>
     <v-card color="white" flat class="pt-3 pb-3">
         <app-table-title :title="getTitle" :has-pagination="showPagination" :page-type="pageType" page-link="/blocks">
-<!--            <template v-if="!isHome" #update>-->
-<!--                <notice-new-block @reload="setPage(0, true)" />-->
-<!--            </template>-->
+            <template v-if="!isHome" #update>
+                <notice-new-block @reload="setPage(0, true)" />
+            </template>
             <template v-if="showPagination && !initialLoad" #pagination>
                 <app-paginate
                     :total="totalPages"
@@ -54,7 +54,7 @@ interface BlockMap {
     components: {
         AppTableTitle,
         AppPaginate,
-        // NoticeNewBlock,
+        NoticeNewBlock,
         TableBlocks
     },
     apollo: {
@@ -141,7 +141,7 @@ interface BlockMap {
             },
             error(error) {
                 this.initialLoad = true
-                this.emitErrorState(true)
+                this.emitErrorState(error)
             }
         }
     }
@@ -161,7 +161,6 @@ export default class RecentBlocks extends Vue {
         if (this.indexedBlocks && this.indexedBlocks[this.index]) {
             return this.indexedBlocks[this.index]
         }
-        // return this.AllBlocks.nodes ? this.AllBlocks.nodes : []
         return (this.allHeaderCidsV2 || {}).nodes || []
     }
 
@@ -201,7 +200,11 @@ export default class RecentBlocks extends Vue {
             if (reset) {
                 this.indexedBlocks = {}
                 this.initialLoad = true
-                await this.$apollo.queries.allHeaderCidsV2.refetch()
+                const variables = {
+                    limit: this.maxItems,
+                    fromBlock: null,
+                }
+                await this.$apollo.queries.allHeaderCidsV2.refetch(variables)
             } else {
                 const lastIndex = ((this.allHeaderCidsV2 || {}).nodes || []).length - 1
                 const from = this.allHeaderCidsV2.nodes[lastIndex].blockNumber || 0
