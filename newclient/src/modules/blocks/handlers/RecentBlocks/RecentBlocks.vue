@@ -64,7 +64,7 @@ interface BlockMap {
             variables() {
                 return {
                     limit: this.maxItems,
-                    fromBlock: "302",
+                    fromBlock: null,
                 }
             },
             fetchPolicy: 'network-only',
