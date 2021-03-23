@@ -6,10 +6,11 @@ export interface Tx {
     from: string
     to: string
     timestamp: Date
-    fee: FormattedNumber
-    value: FormattedNumber
-    status: boolean
+    fee: FormattedNumber | string
+    value: FormattedNumber | string
+    status: boolean | string
     isMined: boolean
+    amount?: number
 }
 
 export interface PendingTx {

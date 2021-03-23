@@ -37,17 +37,25 @@ export interface getBlockTransfersVariables {
   _number?: number | null;
 }
 
+export interface NodesTransaction {
+  id: number;
+  txHash: string;
+  dst: string;
+  src: string;
+  ethHeaderCidByHeaderId: {
+    blockNumber: string;
+    timestamp: string;
+  }
+}
+
 export interface allEthTransactionCids_allEthTransactionCids {
   __typename: "allEthTransactionCids";
-  nodes: {
-    id: number;
-    txHash: string;
-    dst: string;
-    src: string;
-    ethHeaderCidByHeaderId: {
-      blockNumber: string;
-      timestamp: string;
-    }
+  nodes: NodesTransaction [];
+  pageInfo: {
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+    endCursor: string;
+    startCursor: string;
   }
   totalCount: number;
 }

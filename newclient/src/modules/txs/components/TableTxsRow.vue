@@ -9,8 +9,8 @@
             <div :class="isPending ? 'table-row-mobile' : txStatusClass">
                 <v-layout grid-list-xs row wrap align-center justify-start fill-height class="pt-3 pb-3 pr-3 pl-3">
                     <v-flex xs6 pa-1>
-                        <router-link v-if="!isPending" :to="`/block/number/${transferObj.id}`" class="black--text font-weight-medium pb-1"
-                            >{{ $t('block.number') }} {{ transferObj.dst }}</router-link
+                        <router-link v-if="!isPending" :to="`/block/number/${transaction.block}`" class="black--text font-weight-medium pb-1"
+                            >{{ $t('block.number') }} {{ transaction.block }}</router-link
                         >
                         <p v-if="isPending && transaction.isMined" class="caption primary--text blinking">{{ $t('tx.mined') }}</p>
                     </v-flex>
@@ -25,22 +25,20 @@
                     </v-flex>
                     <v-flex xs10 pa-1>
                         <app-transform-hash :hash="transaction.hash" :link="`/tx/${transaction.hash}`" />
-                        {{ 'hash '}}
                     </v-flex>
                     <v-flex xs12 pa-1>
                         <v-layout row pa-2>
-<!--                            <p class="info&#45;&#45;text psmall pr-1">{{ $tc('address.name', 2) }}:</p>-->
-<!--                            <app-transform-hash :hash="transaction.from | toChecksum" :italic="true" :link="`/address/${transaction.from}`" />-->
-<!--                            <v-icon class="fas fa-arrow-right primary&#45;&#45;text pl-2 pr-2" small></v-icon>-->
-<!--                            &lt;!&ndash; <app-transform-hash v-if="tx.isContractCreation" :hash="tx.creates" :italic="true" :link="`/address/${tx.creates}`" /> &ndash;&gt;-->
-<!--                            <app-transform-hash-->
-<!--                                v-if="transaction.to && transaction.to !== ''"-->
-<!--                                :hash="transaction.to | toChecksum"-->
-<!--                                :italic="true"-->
-<!--                                :link="`/address/${transaction.to}`"-->
-<!--                            />-->
-<!--                            <p v-else class="info&#45;&#45;text">{{ $t('contract.creation') }}</p>-->
-                          {{ 'transaction.to '}}
+                            <p class="info--text psmall pr-1">{{ $t('tx.from') }}:</p>
+                            <app-transform-hash :hash="transaction.from | toChecksum" :italic="true" :link="`/address/${transaction.from}`" />
+                            <v-icon class="fas fa-arrow-right primary--text pl-2 pr-2" small></v-icon>
+                            <!-- <app-transform-hash v-if="tx.isContractCreation" :hash="tx.creates" :italic="true" :link="`/address/${tx.creates}`" /> -->
+                            <app-transform-hash
+                                v-if="transaction.to && transaction.to !== ''"
+                                :hash="transaction.to | toChecksum"
+                                :italic="true"
+                                :link="`/address/${transaction.to}`"
+                            />
+                            <p v-else class="info--text">{{ $t('contract.creation') }}</p>
                         </v-layout>
                     </v-flex>
                     <v-flex shrink pa-1>
@@ -48,7 +46,7 @@
                     </v-flex>
                     <v-flex shrink pa-1>
                         <p class="black--text align-center">
-                            {{ 'transaction.value.value '}}
+                            {{ transaction.amount }}
 <!--                            {{ transaction.value.value }}-->
 <!--                            {{ $t(`common.${transaction.value.unit}`) }}-->
 <!--                            <app-tooltip v-if="transaction.value.tooltipText" :text="`${transaction.value.tooltipText} ${$t('common.eth')}`" />-->
@@ -195,7 +193,7 @@ import { Component, Mixins, Prop } from 'vue-property-decorator'
 import AppTimeAgo from '@app/core/components/ui/AppTimeAgo.vue'
 import AppTooltip from '@app/core/components/ui/AppTooltip.vue'
 import { NumberFormatMixin } from '@app/core/components/mixins/number-format.mixin'
-import { FormattedNumber } from '@app/core/helper/number-format-helper'
+import { FormattedNumber, FormattedNumberUnit } from '@app/core/helper/number-format-helper'
 import { Tx } from './props'
 import { TxSummary_transfers as TransferType } from '@app/modules/txs/handlers/BlockTxs/apolloTypes/TxSummary'
 import { TxSummary_transfers_transfer as TransferObj } from '@app/modules/txs/handlers/BlockTxs/apolloTypes/TxSummary'
@@ -211,40 +209,28 @@ import BN from 'bignumber.js'
     }
 })
 export default class TableTxsRow extends Mixins(NumberFormatMixin) {
-    /*
-    ===================================================================================
-      Props
-    ===================================================================================
-    */
-
     @Prop(Object) tx!: TransferType
     @Prop({ type: Boolean, default: false }) isPending!: boolean
-
-    /*
-    ===================================================================================
-      Computed
-    ===================================================================================
-    */
 
     get txStatusClass(): string {
         return this.transferObj.status ? 'tx-status-sucess table-row-mobile' : 'tx-status-fail table-row-mobile'
     }
 
-    get transferObj(): TransferObj {
+    get transferObj(): TransferObj | any {
         return this.tx ? this.tx : { transactionHash: '', block: 0, from: '', to: '', timestamp: 0, txFee: '', status: false, __typename: 'Transfer' }
     }
 
     get transaction(): Tx {
         const tx = this.isPending ? this.tx : this.transferObj
         return {
-            isMined: "this.isPending ? tx['isMined'] : false",
+            isMined: !!"this.isPending ? tx['isMined'] : false", // TODO isMined?
             hash: tx.txHash,
             block: (tx.ethHeaderCidByHeaderId || {}).blockNumber,
             from: tx.src,
             to: tx.dst,
             amount: tx.amount || 0,
             timestamp: new Date(+(tx.ethHeaderCidByHeaderId || {}).timestamp  * 1e3),
-            fee: "this.formatNonVariableEthValue(new BN(tx['txFee']))",
+            fee: `${this.txFee.value} ${this.$t(`common.${this.txFee.unit}`)}`, // gasUsed * gasPrice
             value: "this.formatNonVariableEthValue(new BN(this.tx ? this.tx.value : ''))",
             status: "tx['status'] != null ? tx['status'] : false",
             // txHash: tx.txHash
@@ -253,6 +239,14 @@ export default class TableTxsRow extends Mixins(NumberFormatMixin) {
 
     get isSmall(): boolean {
         return this.$vuetify.breakpoint.name === 'sm'
+    }
+
+    get txFee(): FormattedNumber {
+      if (this.transferObj.gas && this.transferObj.gasPrice) {
+        const fee = new BN(this.transferObj.gasPrice, 16).multipliedBy(new BN(this.transferObj.gas, 16))
+        return this.formatVariableUnitEthValue(fee)
+      }
+      return { value: '0', unit: FormattedNumberUnit.ETH }
     }
 }
 </script>

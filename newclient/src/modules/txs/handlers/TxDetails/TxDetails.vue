@@ -70,12 +70,12 @@ import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
             fetchPolicy: 'network-only',
             update: data => data.ethTransactionCidByHash,
             result({data}) {
-                console.log('Result: ', data)
                 if (data && data.ethTransactionCidByHash) {
                     // if (!this.isReplaced && this.txStatus === 'pending' && !this.subscribed) {
                     //     this.startSubscription()
                     // }
                     const decodedData = decodeTransactionData(data.ethTransactionCidByHash.nodes[0].blockByMhKey.data)
+                    console.log('decodedData: ', decodedData)
                     this.ethTransaction = {...data.ethTransactionCidByHash.nodes[0], ...decodedData}
                     this.emitErrorState(false)
                 }
@@ -169,20 +169,21 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
                 {
                     title: isContractCreation ? this.$i18n.t('tx.to').toString() : this.$t('contract.creation').toString(),
                     detail: tsx.dst, // isContractCreation ? this.transaction.to : this.transaction.contractAddress,
-                    // copy: this.transaction.to !== null,
+                    copy: tsx.dst !== undefined,
                     // link: this.transaction.to !== null ? `/address/${this.transaction.to!}` : `/address/${this.transaction.contractAddress}`,
                     // mono: this.transaction.to !== null,
                     toChecksum: true
                 },
                 {
                     title: this.$i18n.t('common.amount'),
-                    detail: tsx.amount // `${this.txAmount.value} ${this.$t(`common.${this.txAmount.unit}`)}`,
+                    // detail: tsx.value // `${this.txAmount.value} ${this.$t(`common.${this.txAmount.unit}`)}`,
+                    detail: `${this.txAmount.value} ${this.$t(`common.${this.txAmount.unit}`)}`,
                     // tooltip: this.txAmount.tooltipText ? `${this.txAmount.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
                 },
 
                 {
-                    title: this.$i18n.tc(this.pendingString, 1),
-                    detail: '-' // `${this.txFee.value} ${this.$t(`common.${this.txFee.unit}`)}`,
+                    title: this.$i18n.t('tx.fee'),
+                    detail: `${this.txFee.value} ${this.$t(`common.${this.txFee.unit}`)}`,
                     // tooltip: this.txFee.tooltipText ? `${this.txFee.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
                 },
                 {
@@ -197,23 +198,24 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
 
                 {
                     title: this.$i18n.t('gas.price'),
-                    detail: tsx.price // `${this.gasPrice.value} ${this.$t(`common.${this.gasPrice.unit}`)}`,
+                    // detail: tsx.gasPrice // `${this.gasPrice.value} ${this.$t(`common.${this.gasPrice.unit}`)}`,
+                    detail: `${this.gasPrice.value} ${this.$t(`common.${this.gasPrice.unit}`)}`,
                     // tooltip: this.gasPrice.tooltipText ? `${this.gasPrice.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
                 },
                 {
                     title: this.$i18n.t('gas.used'),
-                    detail: '-' // this.formatNumber(new BN(this.transaction.gasUsed || 0).toNumber()) // TODO genesis block txs can have no receipt
+                    detail: this.formatNumber(new BN(tsx.gas || 0).toNumber())
                     // tooltip: receipt && receipt.gasUsedFormatted.tooltipText ? `${receipt.gasUsedFormatted.tooltipText}` : undefined
                 },
                 {
                     title: this.$i18n.t('common.nonce'),
-                    detail: '-' // this.transaction.nonce
+                    detail: tsx.nonce
                     // tooltip: this.transaction.nonce.tooltipText ? `${this.transaction.nonce.tooltipText}` : undefined
                 },
 
                 {
                     title: this.$i18n.t('tx.input'),
-                    detail: '-' // this.transaction.input
+                    detail: tsx.input
                     // txInput: this.inputFormatted
                 }
             ]
@@ -261,16 +263,16 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      *
      * @return {FormattedNumber}
      */
-    get txAmount(): FormattedNumber | string {
-        return this.formatVariableUnitEthValue(new BN(this.ethTransaction.amount, 16))
+    get txAmount(): FormattedNumber {
+        return this.formatVariableUnitEthValue(new BN(this.ethTransaction.value, 16))
     }
     /**
      * Formats the gas price value to gwei.
      *
      * @return {FormattedNumber}
      */
-    get gasPrice(): FormattedNumber | string {
-        return this.formatNonVariableGWeiValue(new BN(this.ethTransaction.price))
+    get gasPrice(): FormattedNumber {
+        return this.formatNonVariableGWeiValue(new BN(this.ethTransaction.gasPrice))
     }
     /**
      * Gets the tx status.
@@ -313,28 +315,22 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      *
      * @return {FormattedNumber}
      */
-    get txFee(): FormattedNumber | string {
-        if (this.transaction && this.transaction.gasUsed) {
-            const price = new BN(this.transaction.gasPrice)
-            const used = new BN(this.transaction.gasUsed)
-            const fee = price.times(used)
+    get txFee(): FormattedNumber {
+        if (this.ethTransaction && this.ethTransaction.gas && this.ethTransaction.gasPrice) {
+            // const price = new BN(this.ethTransaction.gasPrice)
+            // const used = new BN(this.ethTransaction.gas)
+            // const fee = price.times(used)
+            // return this.formatVariableUnitEthValue(fee)
+            const fee = new BN(this.ethTransaction.gasPrice, 16).multipliedBy(new BN(this.ethTransaction.gas, 16))
             return this.formatVariableUnitEthValue(fee)
         }
-        if (!this.isReplaced && this.txStatus === 'pending') {
-            // const fee = new BN(this.transaction.gas).multipliedBy(this.transaction.gasPrice)
-            return 'this.formatVariableUnitEthValue(fee)'
-        }
+        // if (!this.isReplaced && this.txStatus === 'pending') {
+        //     // const fee = new BN(this.transaction.gas).multipliedBy(this.transaction.gasPrice)
+        //     return 'this.formatVariableUnitEthValue(fee)'
+        // }
         return { value: '0', unit: FormattedNumberUnit.ETH }
     }
 
-    get pendingString(): string {
-        return !this.isReplaced && this.txStatus === 'pending' ? 'tx.estimated-fee' : 'tx.fee'
-    }
-    /*
-    ===================================================================================
-     Methods
-    ===================================================================================
-    */
     /**
      * Start apollo subscription
      */

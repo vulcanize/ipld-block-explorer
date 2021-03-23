@@ -9,8 +9,8 @@
                     :total="totalPages"
                     :current-page="currentPage"
                     :has-input="false"
-                    :has-first="hasPrev"
-                    :has-last="hasNext"
+                    :has-first="true"
+                    :has-last="true"
                     @newPage="setPage"
                 /> </template
         ></app-table-title>
@@ -22,7 +22,14 @@
             row
             class="pb-1 pr-3 pl-2"
         >
-            <app-paginate :total="totalPages" :current-page="currentPage" :has-input="true" :has-first="true" :has-last="true" @newPage="setPage" />
+            <app-paginate
+                :total="totalPages"
+                :current-page="currentPage"
+                :has-input="true"
+                :has-first="true"
+                :has-last="true"
+                @newPage="setPage"
+            />
         </v-layout>
     </v-card>
 </template>
@@ -34,13 +41,13 @@ import AppPaginate from '@app/core/components/ui/AppPaginate.vue'
 import NoticeNewBlock from '@app/modules/blocks/components/NoticeNewBlock.vue'
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import BN from 'bignumber.js'
-import { getBlocksArrayByNumber, newBlockTable, allHeaders, AllBlocks } from './recentBlocks.graphql'
-import { allEthHeaderCids_allEthHeaderCids as TypeHeaders } from './apolloTypes/getBlocksArrayByNumber'
+import { getBlocksArrayByNumber, newBlockTable, allHeaders, AllBlocks, newBlocks } from './recentBlocks.graphql'
+import { allEthHeaderCids_allEthHeaderCids as TypeHeaders, EthHeaderCidsBlock } from './apolloTypes/getBlocksArrayByNumber'
 import { ErrorMessageBlock } from '@app/modules/blocks/models/ErrorMessagesForBlock'
 import { excpInvariantViolation } from '@app/apollo/exceptions/errorExceptions'
 
 interface BlockMap {
-    [key: number]: TypeHeaders
+    [key: number]: EthHeaderCidsBlock
 }
 
 @Component({
@@ -88,17 +95,13 @@ interface BlockMap {
 
             result({ data }) {
                 if (data && data.allHeaderCidsV2 && data.allHeaderCidsV2.nodes) {
-                    // console.log('allHeaderCidsV2 ', data.allHeaderCidsV2)
                     this.emitErrorState(false)
                     if (this.initialLoad) {
                         this.startBlock = data.allHeaderCidsV2.nodes[0].blockNumber
                         this.index = 0
-                        this.totalPages = Math.ceil(new BN(this.startBlock + 1).div(this.maxItems).toNumber())
-                        // this.totalPages = Math.ceil(data.allHeaderCidsV2.totalCount / this.maxItems)
+                        this.totalPages = Math.ceil(data.allHeaderCidsV2.totalCount / this.maxItems)
                         this.initialLoad = false
                     }
-                    this.hasPrev = data.allHeaderCidsV2.pageInfo.hasNextPage
-                    this.hasNext = data.allHeaderCidsV2.pageInfo.hasPreviousPage
                     // if (this.pageType === 'home') {
                     //     if (this.getBlocksArrayByNumber[0].number - this.getBlocksArrayByNumber[1].number > 1) {
                     //         this.$apollo.queries.getBlocksArrayByNumber.refetch()
@@ -119,14 +122,12 @@ export default class RecentBlocks extends Vue {
     initialLoad = true
     hasError = false
     syncing?: boolean = false
-    hasPrev?: boolean = false
-    hasNext?: boolean = false
     allHeaderCidsV2!: TypeHeaders
     indexedBlocks: BlockMap = {}
     index = 0
     totalPages = 0
     startBlock!: number
-    get blocks(): any {
+    get blocks(): EthHeaderCidsBlock[] | any {
         if (this.indexedBlocks && this.indexedBlocks[this.index]) {
             return this.indexedBlocks[this.index]
         }
@@ -172,9 +173,9 @@ export default class RecentBlocks extends Vue {
                 this.initialLoad = true
                 await this.$apollo.queries.allHeaderCidsV2.refetch()
             } else {
-                // const from = this.startBlock - this.maxItems * this.index
-                const from = this.allHeaderCidsV2.nodes[9].blockNumber
-                if (from >= 0 && !this.indexedBlocks[this.index]) {
+                const lastIndex = ((this.allHeaderCidsV2 || {}).nodes || []).length - 1
+                const from = this.allHeaderCidsV2.nodes[lastIndex].blockNumber || 0
+                if (from && !this.indexedBlocks[this.index]) {
                     await this.$apollo.queries.allHeaderCidsV2.fetchMore({
                         variables: {
                             fromBlock: from,
@@ -194,17 +195,16 @@ export default class RecentBlocks extends Vue {
             }
             return false
         }
-        // return false
     }
     emitErrorState(val: boolean): void {
         this.hasError = val
         this.$emit('errorBlocksList', this.hasError, ErrorMessageBlock.list)
     }
     @Watch('allHeaderCidsV2', { deep: true })
-    onGetHeadersChanged(val: TypeHeaders, oldVal: TypeHeaders) {
+    onGetHeaderCidsV2Changed(val: TypeHeaders, oldVal: TypeHeaders) {
+        console.log('val: ', val)
+        console.log('oldVal: ', oldVal)
         if ((val || {}).nodes != (oldVal || {}).nodes) {
-            // console.log('$Set: ', this.index, val.nodes)
-            // console.log('indexedBlocks: ', this.indexedBlocks)
             this.$set(this.indexedBlocks, this.index, val.nodes)
         }
     }

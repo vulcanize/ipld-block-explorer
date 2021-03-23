@@ -70,7 +70,7 @@ import TableTxsRow from '@app/modules/txs/components/TableTxsRow.vue'
 import AppTableRowLoading from '@app/core/components/ui/AppTableRowLoading.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Footnote } from '@app/core/components/props'
-const SCROLLVIEW = 'max-height: 850px'
+const SCROLLVIEW = 'max-height: 450px'
 
 /*
   DEV NOTES:
@@ -107,10 +107,9 @@ export default class TableTxs extends Vue {
 
     get displayData(): any[] {
         if (this.txsData) {
-            // const start = this.index * this.maxItems
-            // const end = start + this.maxItems > this.txsData.length ? this.txsData.length : start + this.maxItems
-            // return this.txsData.slice(start, end)
-            return this.txsData
+            const start = this.index * this.maxItems
+            const end = start + this.maxItems > this.txsData.length ? this.txsData.length : start + this.maxItems
+            return this.txsData.slice(start, end)
         }
         return []
     }
