@@ -64,3 +64,21 @@ query AllBlocks($fromBlock: BigInt, $limit: Int) {
         totalCount
     }
 }
+
+subscription newBlocks {
+    listen(topic: "newBlock") {
+        query {
+            allEthHeaderCids(last: 1) {
+                nodes {
+                    blockNumber
+                    blockHash
+                    cid
+                    reward
+                    blockByMhKey {
+                        data
+                    }
+                }
+            }
+        }
+    }
+}

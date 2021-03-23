@@ -92,6 +92,33 @@ interface BlockMap {
             //         }
             //     }
             // ],
+            subscribeToMore: [
+                {
+                    document: newBlocks,
+                    updateQuery: (previousResult, { subscriptionData }) => {
+                        // subscriptionData.data.listen.query.allEthHeaderCids
+                        try {
+                            if (previousResult && subscriptionData.data.newBlockFeed) {
+                                const prevB = previousResult.getBlocksArrayByNumber
+                                const newB = subscriptionData.data.newBlockFeed
+                                newB.txFail = 0
+                                const index = prevB.findIndex(block => block.number === newB.number)
+                                if (index != -1) {
+                                    prevB[index] = newB
+                                    return previousResult
+                                }
+                                return {
+                                    __typename: 'BlockSummary',
+                                    getBlocksArrayByNumber: [newB, ...prevB]
+                                }
+                            }
+                        } catch (error) {
+                            console.log('updateQuery', error)
+                            throw error
+                        }
+                    }
+                }
+            ],
 
             result({ data }) {
                 if (data && data.allHeaderCidsV2 && data.allHeaderCidsV2.nodes) {
