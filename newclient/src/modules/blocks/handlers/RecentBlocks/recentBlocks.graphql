@@ -68,8 +68,16 @@ query AllBlocks($fromBlock: BigInt, $limit: Int) {
 subscription newBlocks {
     listen(topic: "newBlock") {
         query {
-            allEthHeaderCids(last: 1) {
+            allHeaderCidsV2(first: 1) {
+                totalCount
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                    hasPreviousPage
+                    startCursor
+                }
                 nodes {
+                    id
                     blockNumber
                     blockHash
                     cid

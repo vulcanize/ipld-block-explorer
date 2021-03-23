@@ -63,7 +63,8 @@ interface BlockMap {
             query: AllBlocks,
             variables() {
                 return {
-                    limit: this.maxItems
+                    limit: this.maxItems,
+                    fromBlock: "302",
                 }
             },
             fetchPolicy: 'network-only',
@@ -96,24 +97,26 @@ interface BlockMap {
                 {
                     document: newBlocks,
                     updateQuery: (previousResult, { subscriptionData }) => {
-                        // subscriptionData.data.listen.query.allEthHeaderCids
                         try {
-                            if (previousResult && subscriptionData.data.newBlockFeed) {
-                                const prevB = previousResult.getBlocksArrayByNumber
-                                const newB = subscriptionData.data.newBlockFeed
+                            if (previousResult && subscriptionData.data.listen.query.allHeaderCidsV2) {
+                                const prevB = previousResult.allHeaderCidsV2.nodes
+                                const [newB] = subscriptionData.data.listen.query.allHeaderCidsV2.nodes
                                 newB.txFail = 0
-                                const index = prevB.findIndex(block => block.number === newB.number)
+                                const index = prevB.findIndex(block => block.blockNumber === newB.blockNumber)
                                 if (index != -1) {
                                     prevB[index] = newB
                                     return previousResult
                                 }
                                 return {
-                                    __typename: 'BlockSummary',
-                                    getBlocksArrayByNumber: [newB, ...prevB]
+                                    __typename: 'EthHeaderCidsConnection',
+                                    ...subscriptionData.data.listen.query,
+                                    allHeaderCidsV2: {
+                                        ...subscriptionData.data.listen.query.allHeaderCidsV2,
+                                        nodes: [newB, ...prevB]
+                                    }
                                 }
                             }
                         } catch (error) {
-                            console.log('updateQuery', error)
                             throw error
                         }
                     }
@@ -228,9 +231,7 @@ export default class RecentBlocks extends Vue {
         this.$emit('errorBlocksList', this.hasError, ErrorMessageBlock.list)
     }
     @Watch('allHeaderCidsV2', { deep: true })
-    onGetHeaderCidsV2Changed(val: TypeHeaders, oldVal: TypeHeaders) {
-        console.log('val: ', val)
-        console.log('oldVal: ', oldVal)
+    onAllHeaderCidsV2Changed(val: TypeHeaders, oldVal: TypeHeaders) {
         if ((val || {}).nodes != (oldVal || {}).nodes) {
             this.$set(this.indexedBlocks, this.index, val.nodes)
         }

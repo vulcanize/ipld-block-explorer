@@ -35,7 +35,7 @@ export interface EthHeaderCidsBlock {
 }
 
 export interface allEthHeaderCids_allEthHeaderCids {
-  __typename: "allEthHeaderCids";
+  __typename: "EthHeaderCidsConnection";
   nodes: EthHeaderCidsBlock[];
   totalCount: number;
 }
