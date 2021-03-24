@@ -129,7 +129,7 @@ interface BlockMap {
                     if (this.initialLoad) {
                         this.startBlock = data.allHeaderCidsV2.nodes[0].blockNumber
                         this.index = 0
-                        this.totalPages = Math.ceil(data.allHeaderCidsV2.totalCount / this.maxItems)
+                        this.totalPages = Math.ceil(data.allEthHeaderCids.totalCount / this.maxItems)
                         this.initialLoad = false
                     }
                     // if (this.pageType === 'home') {
