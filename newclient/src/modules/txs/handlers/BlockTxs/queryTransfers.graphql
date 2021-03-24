@@ -22,6 +22,9 @@ query getBlockTransfers($_number: Int) {
 query getTransactions($last: Int, $before: Cursor) {
     allEthTransactionCids(last: $last, before: $before) {
         nodes {
+            blockByMhKey {
+                data
+            }
             id
             txHash
             dst
@@ -29,9 +32,31 @@ query getTransactions($last: Int, $before: Cursor) {
             ethHeaderCidByHeaderId {
                 blockNumber
                 timestamp
-                blockByMhKey {
-                    data
-                }
+            }
+        }
+        pageInfo {
+            endCursor
+            startCursor
+            hasPreviousPage
+            hasNextPage
+        }
+        totalCount
+    }
+}
+
+query getBlockTsx($blockRef: BigInt) {
+    transactionCidsByBlockNumber(blocknumber: $blockRef) {
+        nodes {
+            blockByMhKey {
+                data
+            }
+            id
+            txHash
+            dst
+            src
+            ethHeaderCidByHeaderId {
+                blockNumber
+                timestamp
             }
         }
         pageInfo {

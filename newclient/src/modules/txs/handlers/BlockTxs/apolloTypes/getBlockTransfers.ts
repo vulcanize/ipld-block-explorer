@@ -4,29 +4,19 @@
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL query operation: getBlockTransfers
+// GraphQL query operation: getBlockTsx
 // ====================================================
 
-export interface getBlockTransfers_getBlockTransfers_transfers_transfer {
-  __typename: "Transfer";
-  transactionHash: string;
-  to: string;
-  block: number;
-  timestamp: number;
-  from: string;
-  txFee: string;
-  status: boolean | null;
-}
-
-export interface getBlockTransfers_getBlockTransfers_transfers {
-  __typename: "EthTransfer";
-  transfer: getBlockTransfers_getBlockTransfers_transfers_transfer;
-  value: string;
-}
-
 export interface getBlockTransfers_getBlockTransfers {
-  __typename: "ETHTransfers";
-  transfers: (getBlockTransfers_getBlockTransfers_transfers | null)[];
+  __typename: "EthTransactionCidsConnection";
+  nodes: NodesTransaction [];
+  pageInfo: {
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+    endCursor: string;
+    startCursor: string;
+  }
+  totalCount: number;
 }
 
 export interface getBlockTransfers {

@@ -46,10 +46,9 @@ import AppNewUpdate from '@app/core/components/ui/AppNewUpdate.vue'
 import TableTxs from '@app/modules/txs/components/TableTxs.vue'
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import BN from 'bignumber.js'
-import { getBlockTransfers, getAllTxs, newTransfersCompleteFeed, getTransactions, newTransactions } from './queryTransfers.graphql'
+import { getBlockTransfers, getAllTxs, newTransfersCompleteFeed, getTransactions, newTransactions, getBlockTsx } from './queryTransfers.graphql'
 import {
     getBlockTransfers_getBlockTransfers as TypeBlockTransfers,
-    getBlockTransfers_getBlockTransfers_transfers as TypeTransfers,
     allEthTransactionCids_allEthTransactionCids as TypeEthTransaction,
     NodesTransaction
 } from './apolloTypes/getBlockTransfers'
@@ -72,9 +71,9 @@ import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
         allEthTransactionCids: {
             query: getTransactions,
             fetchPolicy: 'network-only',
-            // skip() {
-            //     return this.skipBlockTxs
-            // },
+            skip() {
+                return this.isBlock
+            },
             variables() {
                 return {
                     last: this.maxItems,
@@ -84,7 +83,7 @@ import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
             result({ data }) {
                 if (data && data.allEthTransactionCids && data.allEthTransactionCids.nodes) {
                     this.allEthTransactionCids.nodes = data.allEthTransactionCids.nodes.map(node => {
-                        const decodedData = decodeTransactionData(node.ethHeaderCidByHeaderId.blockByMhKey.data)
+                        const decodedData = decodeTransactionData(node.blockByMhKey.data)
                         return {...node, ...decodedData}
                     })
                     this.totalPages = Math.ceil(data.allEthTransactionCids.totalCount / this.maxItems)
@@ -93,39 +92,43 @@ import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
                 }
             },
             error(error) {
-                this.emitErrorState(true)
+                this.emitErrorState(error)
             }
         },
-        // getAllEthTransfers: {
-        //     query: getAllTxs,
-        //     fetchPolicy: 'network-only',
-        //     variables() {
-        //         return {
-        //             _limit: this.maxItems,
-        //             _nextKey: null
-        //         }
-        //     },
-        //     skip() {
-        //         return this.isBlock
-        //     },
-        //     result({ data }) {
-        //         if (data && data.getAllEthTransfers && data.getAllEthTransfers.transfers) {
-        //             this.initialLoad = false
-        //             this.emitErrorState(false)
-        //         } else {
-        //             this.emitErrorState(true)
-        //         }
-        //     },
-        //     error(error) {
-        //         this.emitErrorState(true)
-        //     }
-        // },
+        transactionCidsByBlockNumber: {
+            query: getBlockTsx,
+            fetchPolicy: 'network-only',
+            skip() {
+                return this.skipBlockTxs
+            },
+            variables() {
+                return {
+                  blockRef: this.blockRef
+                }
+            },
+            result({ data }) {
+                if (data && data.transactionCidsByBlockNumber && data.transactionCidsByBlockNumber.nodes) {
+                    this.transactionCidsByBlockNumber.nodes = data.transactionCidsByBlockNumber.nodes.map(node => {
+                      const decodedData = decodeTransactionData(node.blockByMhKey.data)
+                      return {...node, ...decodedData}
+                    })
+                    this.totalPages = Math.ceil(data.transactionCidsByBlockNumber.totalCount / this.maxItems)
+                    this.initialLoad = false
+                    this.emitErrorState(false)
+                } else {
+                    this.emitErrorState(true)
+                }
+            },
+            error(error) {
+                this.emitErrorState(error)
+            }
+        },
         $subscribe: {
             newTransactions: {
                 query: newTransactions,
-                // skip() {
-                //     return this.isBlock
-                // },
+                skip() {
+                    return this.isBlock
+                },
                 result({ data }) {
                     if (data.listen.query.allEthTransactionCids.nodes.length) {
                         if (this.isHome) {
@@ -154,7 +157,7 @@ export default class BlockTxs extends Vue {
     @Prop({ type: Boolean, default: false }) isMined!: boolean
 
     initialLoad = true
-    // getBlockTransfers!: TypeBlockTransfers
+    transactionCidsByBlockNumber!: TypeBlockTransfers
     allEthTransactionCids!: TypeEthTransaction
     getAllEthTransfers!: AllTxType
     index = 0
@@ -164,16 +167,16 @@ export default class BlockTxs extends Vue {
     hasError = false
 
     get transactions(): NodesTransaction[] | [] {
-        // if (this.isBlock && this.getBlockTransfers && this.getBlockTransfers.transfers !== null) {
-        //     return this.getBlockTransfers.transfers
-        // }
-        // if (!this.isBlock && this.getAllEthTransfers && this.getAllEthTransfers.transfers !== null) {
-        //     return this.getAllEthTransfers.transfers
-        // }
+        if (this.isBlock && this.transactionCidsByBlockNumber && this.transactionCidsByBlockNumber.nodes.length) {
+            return (this.transactionCidsByBlockNumber || {}).nodes || []
+        }
+        if (!this.isBlock && this.allEthTransactionCids && this.allEthTransactionCids.nodes.length) {
+            return (this.allEthTransactionCids || {}).nodes || []
+        }
         // if (!this.isBlock && this.EthTransactions && this.getAllEthTransfers.transfers !== null) {
         //     return this.getAllEthTransfers.transfers
         // }
-        return (this.allEthTransactionCids || {}).nodes || []
+        return []
     }
 
     get message(): string {
@@ -204,9 +207,9 @@ export default class BlockTxs extends Vue {
         // if (this.isHome) {
         //     return false
         // }
-        // if (this.isBlock) {
-        //     return this.totalPages > 1
-        // }
+        if (this.isBlock) {
+            return this.totalPages > 1
+        }
         //
         // return this.hasMore
         return !this.isHome

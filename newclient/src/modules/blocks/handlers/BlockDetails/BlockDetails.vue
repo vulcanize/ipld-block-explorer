@@ -139,7 +139,6 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 }
             ]
         } else {
-          console.log('Block details: ', this.header)
           details = [
                 {
                     title: this.$i18n.t('common.height'),
