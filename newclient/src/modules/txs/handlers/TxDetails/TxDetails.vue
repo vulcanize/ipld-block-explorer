@@ -75,7 +75,6 @@ import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
                     //     this.startSubscription()
                     // }
                     const decodedData = decodeTransactionData(data.ethTransactionCidByHash.nodes[0].blockByMhKey.data)
-                    console.log('decodedData: ', decodedData)
                     this.ethTransaction = {...data.ethTransactionCidByHash.nodes[0], ...decodedData}
                     this.emitErrorState(false)
                 }
@@ -150,7 +149,6 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
         } else {
             const isContractCreation = "typeof this.transaction.contractAddress !== 'string'"
             const tsx = this.ethTransaction
-            console.log('Tsx: ', tsx)
             details = [
                 {
                     title: this.$i18n.t('common.hash'),
