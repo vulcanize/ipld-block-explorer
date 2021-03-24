@@ -63,6 +63,9 @@ query AllBlocks($fromBlock: BigInt, $limit: Int) {
         }
         totalCount
     }
+    allEthHeaderCids {
+        totalCount
+    }
 }
 
 subscription newBlocks {
