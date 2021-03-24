@@ -17,15 +17,15 @@
     =====================================================================================
     -->
         <!-- TODO: Implement get block transfers by hash -->
-<!--        <block-txs-->
-<!--            v-if="isValid && hasNumber"-->
-<!--            :max-items="maxItems"-->
-<!--            :block-ref="blockNumber"-->
-<!--            :is-hash="isHash"-->
-<!--            :is-mined="isMined"-->
-<!--            page-type="blockDetails"-->
-<!--            @errorTxs="setError"-->
-<!--        />-->
+        <block-txs
+            v-if="isValid && hasNumber"
+            :max-items="maxItems"
+            :block-ref="blockNumber"
+            :is-hash="isHash"
+            :is-mined="isMined"
+            page-type="blockDetails"
+            @errorTxs="setError"
+        />
     </v-container>
 </template>
 
@@ -51,7 +51,7 @@ const MAX_TXS = 10
         // AppDetailsList,
         AppMessage,
         BlockDetails,
-        // BlockTxs
+        BlockTxs
     }
 })
 export default class PageDetailsBlock extends Vue {
@@ -67,8 +67,6 @@ export default class PageDetailsBlock extends Vue {
             this.blockNumber = this.blockRef
         }
         // this.blockRef = +this.blockRef
-        console.log('PageDetailsBlock: ', this.blockRef)
-        console.log('PageDetailsBlock: blockNumber ', this.blockNumber)
     }
     /**
      * Sets isMined to true
