@@ -70,13 +70,15 @@ import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
             fetchPolicy: 'network-only',
             update: data => data.ethTransactionCidByHash,
             result({data}) {
-                if (data && data.ethTransactionCidByHash) {
+                if (data && data.ethTransactionCidByHash && data.ethTransactionCidByHash.nodes[0]) {
                     // if (!this.isReplaced && this.txStatus === 'pending' && !this.subscribed) {
                     //     this.startSubscription()
                     // }
                     const decodedData = decodeTransactionData(data.ethTransactionCidByHash.nodes[0].blockByMhKey.data)
                     this.ethTransaction = {...data.ethTransactionCidByHash.nodes[0], ...decodedData}
                     this.emitErrorState(false)
+                } else {
+                    this.emitErrorState(true, true)
                 }
             },
             error(error) {
