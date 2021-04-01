@@ -597,6 +597,17 @@
   dependencies:
     tslib "^2.0.1"
 
+"@graphile/pg-pubsub@^4.11.0":
+  version "4.11.0"
+  resolved "https://registry.yarnpkg.com/@graphile/pg-pubsub/-/pg-pubsub-4.11.0.tgz#a3542545d84290c40b03bedf3a2dbd5a557d4525"
+  integrity sha512-7U2J/QpSu+hsn3bAvEZb8RmS/rYmgY3G1c+TGl+9ZXVVyaQ3sXNACoOnCaF0oAzRak2YTVYuc/o8iIAWxPEv2A==
+  dependencies:
+    "@types/debug" "^4.1.4"
+    "@types/pg" "^7.4.14"
+    debug "^4.1.1"
+    graphql-subscriptions "^1.1.0"
+    tslib "^2.0.1"
+
 "@graphql-typed-document-node/core@^3.0.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.0.tgz#0eee6373e11418bfe0b5638f654df7a4ca6a3950"
@@ -973,6 +984,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/debug@^4.1.4":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
+  integrity sha512-Q1y515GcOdTHgagaVFhHnIFQ38ygs/kmxdNpvpou+raI9UO3YZcHDngBSYKQklcKlvA7iuQlmIKbzvmxcOE9CQ==
+
 "@types/eslint-scope@^3.7.0":
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-scope/-/eslint-scope-3.7.0.tgz#4792816e31119ebd506902a482caec4951fabd86"
@@ -1110,7 +1126,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/pg@>=6 <8", "@types/pg@^7.4.10":
+"@types/pg@>=6 <8", "@types/pg@^7.4.10", "@types/pg@^7.4.14":
   version "7.14.11"
   resolved "https://registry.yarnpkg.com/@types/pg/-/pg-7.14.11.tgz#daf5555504a1f7af4263df265d91f140fece52e3"
   integrity sha512-EnZkZ1OMw9DvNfQkn2MTJrwKmhJYDEs5ujWrPfvseWNoI95N8B4HzU/Ltrq5ZfYxDX/Zg8mTzwr6UAyTjjFvXA==
@@ -1331,12 +1347,13 @@
   resolved "https://registry.yarnpkg.com/@vue/web-component-wrapper/-/web-component-wrapper-1.2.0.tgz#bb0e46f1585a7e289b4ee6067dcc5a6ae62f1dd1"
   integrity sha512-Xn/+vdm9CjuC9p3Ae+lTClNutrVhsXpzxvoTXXtoys6kVRX9FkueSUAqSWAyZntmVLlR4DosBV4pH8y5Z/HbUw==
 
-"@vulcanize/eth-watcher-ts@0.0.14":
-  version "0.0.14"
-  resolved "https://npm.pkg.github.com/download/@vulcanize/eth-watcher-ts/0.0.14/bc7ff96da78d2dbc0faa5aaae53e28bc476ba182175bc4e94de4f1f6dd9d5a88#da896ce7908f0c16bbe908bcefc719ffc2e7d82b"
-  integrity sha512-xZZdx8mYshMvaXjt3m4Y1NloGIkSRx5DOg0q9Tb5AjaoqwfeDcdCOu0OK4iyKuapuacKHD8WcGHv1BB877xOFg==
+"@vulcanize/eth-watcher-ts@0.0.16":
+  version "0.0.16"
+  resolved "https://npm.pkg.github.com/download/@vulcanize/eth-watcher-ts/0.0.16/4c6b0040dffbaf119d27b95e994a9c64e335a86e125bbe061a6c5cad42d8b800#203786268a3f182b1b589f01e8174b43b50ad49a"
+  integrity sha512-znnsV7NOcsDijv5Hx1zJBd10CweJxUeVdh3/t+hCmc6NIljLi84v6GHI9NDzik/GZPhZL6ZnxwHwtj4CBIH9Gg==
   dependencies:
     "@apollo/client" "^3.2.0"
+    "@graphile/pg-pubsub" "^4.11.0"
     "@iarna/toml" "^2.2.5"
     "@solidity-parser/parser" "^0.11.1"
     "@types/express" "^4.17.1"
@@ -1364,6 +1381,7 @@
     typescript "^3.9.7"
     webpack "^5.10.0"
     ws "^7.4.1"
+    yargs "^16.2.0"
 
 "@webassemblyjs/ast@1.11.0":
   version "1.11.0"
@@ -6058,6 +6076,13 @@ graphql-request@^1.5.0:
   dependencies:
     cross-fetch "2.2.2"
 
+graphql-subscriptions@^1.1.0:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/graphql-subscriptions/-/graphql-subscriptions-1.2.1.tgz#2142b2d729661ddf967b7388f7cf1dd4cf2e061d"
+  integrity sha512-95yD/tKi24q8xYa7Q9rhQN16AYj5wPbrb8tmHGM3WRc9EBmWrG/0kkMl+tQG8wcEuE9ibR4zyOM31p5Sdr2v4g==
+  dependencies:
+    iterall "^1.3.0"
+
 graphql-tag@2.11.0, graphql-tag@^2.10.1, graphql-tag@^2.10.3:
   version "2.11.0"
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.11.0.tgz#1deb53a01c46a7eb401d6cb59dec86fa1cccbffd"
@@ -7102,7 +7127,7 @@ isurl@^1.0.0-alpha5:
     has-to-string-tag-x "^1.2.0"
     is-object "^1.0.1"
 
-iterall@^1.0.2, iterall@^1.2.1, iterall@^1.2.2:
+iterall@^1.0.2, iterall@^1.2.1, iterall@^1.2.2, iterall@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/iterall/-/iterall-1.3.0.tgz#afcb08492e2915cbd8a0884eb93a8c94d0d72fea"
   integrity sha512-QZ9qOMdF+QLHxy1QIpUHUU1D5pS2CG2P69LF6L6CPjPYA/XMOmKV3PZpawHoAjHNyB0swdVTRxdYT4tbBbxqwg==
@@ -13044,7 +13069,7 @@ yargs@^15.0.0, yargs@^15.1.0:
     y18n "^4.0.0"
     yargs-parser "^18.1.2"
 
-yargs@^16.0.0, yargs@^16.0.3, yargs@^16.1.0:
+yargs@^16.0.0, yargs@^16.0.3, yargs@^16.1.0, yargs@^16.2.0:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-16.2.0.tgz#1c82bf0f6b6a66eafce7ef30e376f49a12477f66"
   integrity sha512-D1mvvtDG0L5ft/jGWkLpG1+m0eQxOfaBvTNELraWj22wSVUMWxZUvYgJYcKh6jGGIkJFhH4IZPQhR4TKpc8mBw==
