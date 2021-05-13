@@ -9,8 +9,8 @@ import { newBlockFeed_newBlockFeed as newBlockFeedType } from './apolloTypes/new
                 query: newBlockFeed,
                 result({ data }) {
                     this.hasNewBlockUpdateError = false
-                    const number = data.listen.query.allHeaderCidsV2.nodes.length
-                    const timestamp = data.listen.query.allHeaderCidsV2.nodes[0].timestamp
+                    const number = data.listen.relatedNode.blockNumber;
+                    const timestamp = data.listen.relatedNode.timestamp;
                     this.newBlock = {
                         number, timestamp, miner: null, txCount: null
                     }

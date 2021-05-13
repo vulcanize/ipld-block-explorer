@@ -1,11 +1,11 @@
 subscription newBlockFeed {
-    listen(topic: "newBlock") {
-        query {
-            allHeaderCidsV2(first: 3) {
-                nodes {
-                    timestamp
-                }
-            }
+    listen(topic: "header_cids") {
+      relatedNode {
+        ... on EthHeaderCid {
+          id
+          blockNumber
+          timestamp
         }
+      }
     }
 }

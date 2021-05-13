@@ -70,7 +70,7 @@ query getBlockTsx($blockRef: BigInt) {
 }
 
 subscription newTransactions {
-    listen(topic: "newBlock") {
+    listen(topic: "header_cids") {
         query {
             allEthTransactionCids(first: 1) {
                 nodes {
