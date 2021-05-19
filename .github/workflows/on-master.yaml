@@ -32,6 +32,11 @@ jobs:
     needs: test
     steps:
       - uses: actions/checkout@v2
+      - name: Get the version
+        id: vars
+        run: |
+          echo ::set-output name=sha::$(echo ${GITHUB_SHA:0:7})
+          echo ::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})
       - name: Run docker build
         working-directory: ./newclient
         run: docker build -t vulcanize/ipld-block-explorer --build-arg GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} .
