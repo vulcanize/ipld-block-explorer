@@ -1,0 +1,44 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [15.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+#      - name: Install Yarn
+#        run: npm install -g yarn
+      - name: Setup and build
+        working-directory: ./newclient
+        run: |
+          cp .npmrc.example .npmrc && sed -i "s/TOKEN/${{ secrets.ACCESS_TOKEN }}/" .npmrc
+          yarn
+          yarn build
+
+  build:
+    name: Run docker build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run docker build
+        working-directory: ./newclient
+        run: docker build -t vulcanize/ipld-block-explorer --build-arg GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} .
+      - name: Tag docker image
+        run: docker tag vulcanize/ipld-block-explorer docker.pkg.github.com/vulcanize/ipld-block-explorer/ipld-block-explorer:${{steps.vars.outputs.sha}}
+      - name: Docker Login
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u vulcanize --password-stdin
+      - name: Docker Push
+        run: docker push docker.pkg.github.com/vulcanize/ipld-block-explorer/ipld-block-explorer:${{steps.vars.outputs.sha}}
+
