@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run docker build
         working-directory: ./newclient
-        run: docker build -t vulcanize/ipld-block-explorer --build-arg GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }}
+        run: docker build -t vulcanize/ipld-block-explorer --build-arg GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} .
       - name: Tag docker image
         run: docker tag vulcanize/ipld-block-explorer docker.pkg.github.com/vulcanize/ipld-block-explorer/ipld-block-explorer:${{steps.vars.outputs.sha}}
       - name: Docker Login
