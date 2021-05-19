@@ -22,6 +22,7 @@ jobs:
       - name: Setup and build
         working-directory: ./newclient
         run: |
+          cp .npmrc.example .npmrc && sed -i "s/TOKEN/${{ secrets.ACCESS_TOKEN }}/" .npmrc
           yarn
           yarn build
 
