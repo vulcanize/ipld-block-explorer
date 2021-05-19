@@ -17,12 +17,6 @@
         "apollo:schema": "apollo service:download ./src/apollo/schemas/api.json",
         "apollo:codegen": "yarn apollo:schema && apollo client:codegen --target=typescript  --globalTypesFile=./src/apollo/global/globalTypes.ts  apolloTypes"
     },
-    "husky": {
-        "hooks": {
-            "pre-commit": "bash ./checkBranch.sh && yarn lint:fix",
-            "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-        }
-    },
     "dependencies": {
         "@babel/core": "^7.4.5",
         "@commitlint/config-conventional": "^11.0.0",
