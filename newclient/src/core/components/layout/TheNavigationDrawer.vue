@@ -58,19 +58,7 @@
                     </v-list>
                 </v-flex>
                 <v-spacer />
-                <!--
-                =====================================================================================
-                  REPORT BUTTON
-                =====================================================================================
-                -->
-                <v-flex v-if="!mini">
-                    <v-layout align-center justify-end column fill-height pa-4>
-                        <p class="white--text text-xs-center pb-2">{{ $t('message.report') }}</p>
-                        <v-btn :href="`mailto:${supportEmail}`" outline color="bttnReport" class="text-capitalize font-weight-regular">{{
-                            $t('btn.report')
-                        }}</v-btn>
-                    </v-layout>
-                </v-flex>
+
             </v-layout>
         </v-navigation-drawer>
         <!--
@@ -213,46 +201,46 @@ export default class TheNavigationDrawer extends Vue {
                         routerLink: '/txs',
                         name: 'transactions'
                     },
-                    {
-                        text: this.$i18n.tc('tx.pending', 2),
-                        routerLink: '/pending-txs',
-                        name: 'pending'
-                    }
+                    // {
+                    //     text: this.$i18n.tc('tx.pending', 2),
+                    //     routerLink: '/pending-txs',
+                    //     name: 'pending'
+                    // }
                 ]
             },
-            {
-                header: {
-                    text: this.$i18n.tc('token.name', 2),
-                    icon: 'fab fa-ethereum',
-                    routerLink: '/tokens'
-                },
-                links: [
-                    {
-                        text: this.$i18n.t('token.view-all'),
-                        routerLink: '/tokens',
-                        name: 'tokens'
-                    },
-                    {
-                        text: this.$i18n.tc('token.favorite', 2),
-                        routerLink: '/tokens/favorites',
-                        name: 'fav_tokens'
-                    }
-                ]
-            },
-            {
-                header: {
-                    icon: 'fas fa-chart-pie',
-                    text: this.$i18n.t('charts.name'),
-                    routerLink: '/charts'
-                }
-            },
-            {
-                header: {
-                    icon: 'fas fa-heart',
-                    text: this.$t('fav.title'),
-                    routerLink: '/fav_addresses'
-                }
-            }
+            // {
+            //     header: {
+            //         text: this.$i18n.tc('token.name', 2),
+            //         icon: 'fab fa-ethereum',
+            //         routerLink: '/tokens'
+            //     },
+            //     links: [
+            //         {
+            //             text: this.$i18n.t('token.view-all'),
+            //             routerLink: '/tokens',
+            //             name: 'tokens'
+            //         },
+            //         {
+            //             text: this.$i18n.tc('token.favorite', 2),
+            //             routerLink: '/tokens/favorites',
+            //             name: 'fav_tokens'
+            //         }
+            //     ]
+            // },
+            // {
+            //     header: {
+            //         icon: 'fas fa-chart-pie',
+            //         text: this.$i18n.t('charts.name'),
+            //         routerLink: '/charts'
+            //     }
+            // },
+            // {
+            //     header: {
+            //         icon: 'fas fa-heart',
+            //         text: this.$t('fav.title'),
+            //         routerLink: '/fav_addresses'
+            //     }
+            // }
         ]
     }
 

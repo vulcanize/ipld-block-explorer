@@ -209,7 +209,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
                 },
                 {
                     title: this.$i18n.t('common.nonce'),
-                    detail: tsx.nonce
+                    detail: this.nonce
                     // tooltip: this.transaction.nonce.tooltipText ? `${this.transaction.nonce.tooltipText}` : undefined
                 },
 
@@ -274,6 +274,10 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
     get gasPrice(): FormattedNumber {
         return this.formatNonVariableGWeiValue(new BN(this.ethTransaction.gasPrice))
     }
+
+    get nonce(): string {
+      return this.formatNumber(new BN(this.ethTransaction.nonce, 16));
+    }
     /**
      * Gets the tx status.
      *
@@ -281,6 +285,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      */
     get txStatus(): string {
         if (this.isReplaced) {
+          console.log('replaceddddd')
             return 'replaced-tx'
         }
         const statuses = ['0x0', '0x1']
@@ -294,6 +299,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
     }
 
     get isReplaced(): boolean {
+      console.log('zzz', this.transaction && this.transaction.replacedBy !== null)
         return this.transaction && this.transaction.replacedBy !== null
     }
 
