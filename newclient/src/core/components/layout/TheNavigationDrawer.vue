@@ -88,11 +88,11 @@
                     </v-layout>
                 </v-flex>
                 <v-spacer />
-                <v-flex v-if="!showSearchMobile" shrink>
-                    <v-btn icon @click="showSearchMobile = true">
-                        <v-icon class="fa fa-search white--text" />
-                    </v-btn>
-                </v-flex>
+<!--                <v-flex v-if="!showSearchMobile" shrink>-->
+<!--                    <v-btn icon @click="showSearchMobile = true">-->
+<!--                        <v-icon class="fa fa-search white&#45;&#45;text" />-->
+<!--                    </v-btn>-->
+<!--                </v-flex>-->
                 <v-flex xs1>
                     <v-btn icon @click.stop="setDrawer">
                         <v-icon class="fa fa-bars white--text" />
@@ -113,18 +113,18 @@
                     </v-layout>
                 </v-flex>
                 <v-spacer />
-                <v-flex xs9 sm7 md6> <search-details /> </v-flex>
+<!--                <v-flex xs9 sm7 md6> <search-details /> </v-flex>-->
             </v-layout>
-            <template v-if="showSearchMobile" #extension>
-                <v-layout row justify-center align-center>
-                    <v-flex xs11> <search-details /> </v-flex>
-                    <v-flex xs1>
-                        <v-btn icon @click="showSearchMobile = false">
-                            <v-icon class="fas fa-times white--text" />
-                        </v-btn>
-                    </v-flex>
-                </v-layout>
-            </template>
+<!--            <template v-if="showSearchMobile" #extension>-->
+<!--                <v-layout row justify-center align-center>-->
+<!--                    <v-flex xs11> <search-details /> </v-flex>-->
+<!--                    <v-flex xs1>-->
+<!--                        <v-btn icon @click="showSearchMobile = false">-->
+<!--                            <v-icon class="fas fa-times white&#45;&#45;text" />-->
+<!--                        </v-btn>-->
+<!--                    </v-flex>-->
+<!--                </v-layout>-->
+<!--            </template>-->
         </v-toolbar>
     </div>
 </template>
