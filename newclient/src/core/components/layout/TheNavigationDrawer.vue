@@ -14,10 +14,10 @@
                     =====================================================================================
                     -->
                     <v-layout v-if="mini" column>
-                        <v-img :src="require('@/assets/logo-compact.png')" height="70px" max-width="80px" contain class="mb-2 mt-2"></v-img>
+                        <v-img :src="require('@/assets/block-explorer.png')" height="70px" max-width="80px" contain class="mb-2 mt-2"></v-img>
                     </v-layout>
                     <v-layout v-else align-end justify-start row>
-                        <v-img :src="require('@/assets/logo-white.png')" height="50px" max-width="130px" contain class="mb-4 mt-4 ml-2"></v-img>
+                        <v-img :src="require('@/assets/block-explorer.png')" height="50px" max-width="130px" contain class="mb-4 mt-4 ml-2"></v-img>
                     </v-layout>
 
                     <!--
@@ -84,7 +84,7 @@
             <v-layout v-if="showMobile" align-center row fill-height>
                 <v-flex shrink>
                     <v-layout align-end justify-start row fill-height>
-                        <v-img :src="require('@/assets/logo-white.png')" height="30px" width="70px" contain></v-img>
+                        <v-img :src="require('@/assets/block-explorer.png')" height="30px" width="70px" contain></v-img>
                     </v-layout>
                 </v-flex>
                 <v-spacer />
