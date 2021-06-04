@@ -53,6 +53,8 @@ query getHeaderByNumber($blockRef: BigInt!) {
         nodes {
             blockHash
             blockNumber
+            cid
+            td
             blockByMhKey {
                 data
             }

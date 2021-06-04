@@ -145,6 +145,12 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                     detail: this.header.blockNumber
                 },
                 {
+                    title: this.$i18n.t('block.cid'),
+                    detail: this.header.cid,
+                    copy: true,
+                    mono: true
+                },
+                {
                     title: this.$i18n.t('common.hash'),
                     detail: this.header.blockHash,
                     copy: true,
@@ -195,7 +201,7 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.t('diff.total'),
-                    detail: '-', // this.formatNumber(new BN(this.block.totalDifficulty).toNumber())
+                    detail: this.formatNumber(new BN(this.header.td).toNumber())
                 },
                 {
                     title: this.$i18n.t('common.size'),
@@ -241,7 +247,7 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: `${this.$i18n.tc('uncle.name', 2)} ${this.$i18n.t('common.sha')}`,
-                    detail: this.header.uncleHash, // this.block.sha3Uncles,
+                    detail: `0x${this.header.uncleHash}`, // this.block.sha3Uncles,
                     mono: true
                 }
             ]

@@ -31,6 +31,7 @@ export interface HeaderDetails {
   blockHash: string;
   parentHash: string;
   blockNumber: string;
+  cid: string;
   reward: string;
   timestamp: string;
   time: string;
@@ -44,5 +45,6 @@ export interface HeaderDetails {
   nonce: string;
   transactionsCount: string;
   difficulty: string;
+  td: string;
   gasLimit: string;
 }

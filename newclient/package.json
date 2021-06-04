@@ -1,7 +1,7 @@
 {
     "name": "cidt",
     "version": "1.0.0",
-    "description": "CIDT: Ethereum networks explorer",
+    "description": "IPLD Block Explorer",
     "author": "EthVM Team",
     "private": true,
     "scripts": {
@@ -15,7 +15,7 @@
         "lint:fix": "vue-cli-service lint --fix",
         "apollo": "apollo",
         "apollo:schema": "apollo service:download ./src/apollo/schemas/api.json",
-        "apollo:codegen": "yarn apollo:schema && apollo client:codegen --target=typescript  --globalTypesFile=./src/apollo/global/globalTypes.ts  apolloTypes"
+        "apollo:codegen": "apollo client:codegen --target=typescript  --globalTypesFile=./src/apollo/global/globalTypes.ts  apolloTypes"
     },
     "dependencies": {
         "@babel/core": "^7.4.5",

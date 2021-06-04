@@ -24,8 +24,9 @@ RUN yarn build
 # nginx container
 FROM nginx:1.19.10-alpine
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /var/www/html
 COPY entrypoint.sh /usr/share/nginx/
+COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 ENTRYPOINT ["/usr/share/nginx/entrypoint.sh"]
 EXPOSE 80

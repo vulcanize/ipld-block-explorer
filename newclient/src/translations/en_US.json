@@ -1,5 +1,6 @@
 {
     "block": {
+        "cid": "CID",
         "name": "Block | Blocks",
         "number": "Block #",
         "mined": "Mined Blocks",

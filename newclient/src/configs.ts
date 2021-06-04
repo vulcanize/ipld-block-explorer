@@ -3,7 +3,6 @@ declare global {
     configs:any;
   }
 }
-console.log(window.configs);
 
 const configs = {
     APOLLO_HTTP: window.configs && window.configs.VUE_APP_HTTP_LINK || process.env.VUE_APP_HTTP_LINK,

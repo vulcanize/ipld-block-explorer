@@ -14,10 +14,10 @@
                     =====================================================================================
                     -->
                     <v-layout v-if="mini" column>
-                        <v-img :src="require('@/assets/logo-compact.png')" height="70px" max-width="80px" contain class="mb-2 mt-2"></v-img>
+                        <v-img :src="require('@/assets/block-explorer.png')" height="70px" max-width="80px" contain class="mb-2 mt-2"></v-img>
                     </v-layout>
                     <v-layout v-else align-end justify-start row>
-                        <v-img :src="require('@/assets/logo-white.png')" height="50px" max-width="130px" contain class="mb-4 mt-4 ml-2"></v-img>
+                        <v-img :src="require('@/assets/block-explorer.png')" height="50px" max-width="130px" contain class="mb-4 mt-4 ml-2"></v-img>
                     </v-layout>
 
                     <!--
@@ -58,19 +58,7 @@
                     </v-list>
                 </v-flex>
                 <v-spacer />
-                <!--
-                =====================================================================================
-                  REPORT BUTTON
-                =====================================================================================
-                -->
-                <v-flex v-if="!mini">
-                    <v-layout align-center justify-end column fill-height pa-4>
-                        <p class="white--text text-xs-center pb-2">{{ $t('message.report') }}</p>
-                        <v-btn :href="`mailto:${supportEmail}`" outline color="bttnReport" class="text-capitalize font-weight-regular">{{
-                            $t('btn.report')
-                        }}</v-btn>
-                    </v-layout>
-                </v-flex>
+
             </v-layout>
         </v-navigation-drawer>
         <!--
@@ -96,15 +84,15 @@
             <v-layout v-if="showMobile" align-center row fill-height>
                 <v-flex shrink>
                     <v-layout align-end justify-start row fill-height>
-                        <v-img :src="require('@/assets/logo-white.png')" height="30px" width="70px" contain></v-img>
+                        <v-img :src="require('@/assets/block-explorer.png')" height="30px" width="70px" contain></v-img>
                     </v-layout>
                 </v-flex>
                 <v-spacer />
-                <v-flex v-if="!showSearchMobile" shrink>
-                    <v-btn icon @click="showSearchMobile = true">
-                        <v-icon class="fa fa-search white--text" />
-                    </v-btn>
-                </v-flex>
+<!--                <v-flex v-if="!showSearchMobile" shrink>-->
+<!--                    <v-btn icon @click="showSearchMobile = true">-->
+<!--                        <v-icon class="fa fa-search white&#45;&#45;text" />-->
+<!--                    </v-btn>-->
+<!--                </v-flex>-->
                 <v-flex xs1>
                     <v-btn icon @click.stop="setDrawer">
                         <v-icon class="fa fa-bars white--text" />
@@ -125,18 +113,18 @@
                     </v-layout>
                 </v-flex>
                 <v-spacer />
-                <v-flex xs9 sm7 md6> <search-details /> </v-flex>
+<!--                <v-flex xs9 sm7 md6> <search-details /> </v-flex>-->
             </v-layout>
-            <template v-if="showSearchMobile" #extension>
-                <v-layout row justify-center align-center>
-                    <v-flex xs11> <search-details /> </v-flex>
-                    <v-flex xs1>
-                        <v-btn icon @click="showSearchMobile = false">
-                            <v-icon class="fas fa-times white--text" />
-                        </v-btn>
-                    </v-flex>
-                </v-layout>
-            </template>
+<!--            <template v-if="showSearchMobile" #extension>-->
+<!--                <v-layout row justify-center align-center>-->
+<!--                    <v-flex xs11> <search-details /> </v-flex>-->
+<!--                    <v-flex xs1>-->
+<!--                        <v-btn icon @click="showSearchMobile = false">-->
+<!--                            <v-icon class="fas fa-times white&#45;&#45;text" />-->
+<!--                        </v-btn>-->
+<!--                    </v-flex>-->
+<!--                </v-layout>-->
+<!--            </template>-->
         </v-toolbar>
     </div>
 </template>
@@ -213,46 +201,46 @@ export default class TheNavigationDrawer extends Vue {
                         routerLink: '/txs',
                         name: 'transactions'
                     },
-                    {
-                        text: this.$i18n.tc('tx.pending', 2),
-                        routerLink: '/pending-txs',
-                        name: 'pending'
-                    }
+                    // {
+                    //     text: this.$i18n.tc('tx.pending', 2),
+                    //     routerLink: '/pending-txs',
+                    //     name: 'pending'
+                    // }
                 ]
             },
-            {
-                header: {
-                    text: this.$i18n.tc('token.name', 2),
-                    icon: 'fab fa-ethereum',
-                    routerLink: '/tokens'
-                },
-                links: [
-                    {
-                        text: this.$i18n.t('token.view-all'),
-                        routerLink: '/tokens',
-                        name: 'tokens'
-                    },
-                    {
-                        text: this.$i18n.tc('token.favorite', 2),
-                        routerLink: '/tokens/favorites',
-                        name: 'fav_tokens'
-                    }
-                ]
-            },
-            {
-                header: {
-                    icon: 'fas fa-chart-pie',
-                    text: this.$i18n.t('charts.name'),
-                    routerLink: '/charts'
-                }
-            },
-            {
-                header: {
-                    icon: 'fas fa-heart',
-                    text: this.$t('fav.title'),
-                    routerLink: '/fav_addresses'
-                }
-            }
+            // {
+            //     header: {
+            //         text: this.$i18n.tc('token.name', 2),
+            //         icon: 'fab fa-ethereum',
+            //         routerLink: '/tokens'
+            //     },
+            //     links: [
+            //         {
+            //             text: this.$i18n.t('token.view-all'),
+            //             routerLink: '/tokens',
+            //             name: 'tokens'
+            //         },
+            //         {
+            //             text: this.$i18n.tc('token.favorite', 2),
+            //             routerLink: '/tokens/favorites',
+            //             name: 'fav_tokens'
+            //         }
+            //     ]
+            // },
+            // {
+            //     header: {
+            //         icon: 'fas fa-chart-pie',
+            //         text: this.$i18n.t('charts.name'),
+            //         routerLink: '/charts'
+            //     }
+            // },
+            // {
+            //     header: {
+            //         icon: 'fas fa-heart',
+            //         text: this.$t('fav.title'),
+            //         routerLink: '/fav_addresses'
+            //     }
+            // }
         ]
     }
 
