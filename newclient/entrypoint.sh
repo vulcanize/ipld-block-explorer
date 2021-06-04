@@ -6,5 +6,5 @@ JSON_STRING='window.configs = { \
   "VUE_APP_OPENSEA_API":"'"${VUE_APP_OPENSEA_API}"'", \
 }'
 
-sed -i "s@// CONFIGURATIONS_PLACEHOLDER@${JSON_STRING}@" /usr/share/nginx/html/index.html
+sed -i "s@// CONFIGURATIONS_PLACEHOLDER@${JSON_STRING}@" /var/www/html/index.html
 exec "$@"
