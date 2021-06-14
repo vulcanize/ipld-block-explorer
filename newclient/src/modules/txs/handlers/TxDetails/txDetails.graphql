@@ -32,6 +32,17 @@ query getEthTransactionByHash($hash: String!) {
             blockByMhKey {
                 data
             }
+            receiptCidByTxId {
+                blockByMhKey {
+                    data
+                }
+                contract
+            }
+            ethHeaderCidByHeaderId {
+                blockHash
+                blockNumber
+                timestamp
+            }
         }
     }
 }

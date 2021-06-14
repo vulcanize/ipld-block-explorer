@@ -8,7 +8,7 @@
         <v-flex xs12>
             <app-details-list :title="title" :details="txDetails" :is-loading="isLoading" :max-items="7">
                 <template v-if="!isLoading" #title>
-                    <tx-details-title :status="titleStatus" />
+                    <tx-details-title :status="status" />
                 </template>
             </app-details-list>
         </v-flex>
@@ -28,7 +28,7 @@ import BN from 'bignumber.js'
 import { ErrorMessageTx, TxStatus } from '@app/modules/txs/models/ErrorMessagesForTx'
 import { FormattedNumberUnit } from '@app/core/helper/number-format-helper'
 import { excpTxDoNotExists } from '@app/apollo/exceptions/errorExceptions'
-import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
+import { decodeTransactionData, decodeReceiptData } from '@vulcanize/eth-watcher-ts/dist/utils'
 
 @Component({
     components: {
@@ -65,17 +65,22 @@ import { decodeTransactionData } from '@vulcanize/eth-watcher-ts/dist/utils'
         ethTransactionCidByHash: {
             query: getEthTransactionByHash,
             variables() {
-                return {hash: this.txRef}
+                return { hash: this.txRef }
             },
             fetchPolicy: 'network-only',
             update: data => data.ethTransactionCidByHash,
-            result({data}) {
+            result({ data }) {
                 if (data && data.ethTransactionCidByHash && data.ethTransactionCidByHash.nodes[0]) {
-                    // if (!this.isReplaced && this.txStatus === 'pending' && !this.subscribed) {
-                    //     this.startSubscription()
-                    // }
-                    const decodedData = decodeTransactionData(data.ethTransactionCidByHash.nodes[0].blockByMhKey.data)
-                    this.ethTransaction = {...data.ethTransactionCidByHash.nodes[0], ...decodedData}
+                    const { blockByMhKey, ethHeaderCidByHeaderId, receiptCidByTxId, ...others } = data.ethTransactionCidByHash.nodes[0]
+                    const decodedData = decodeTransactionData(blockByMhKey.data)
+                    const decodedReceipt = decodeReceiptData(receiptCidByTxId.blockByMhKey.data)
+                    this.ethTransaction = {
+                        ...ethHeaderCidByHeaderId,
+                        ...decodedData,
+                        ...decodedReceipt,
+                        ...others,
+                        contractAddress: receiptCidByTxId.contract
+                    }
                     this.emitErrorState(false)
                 } else {
                     this.emitErrorState(true, true)
@@ -114,140 +119,87 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      * If the data hasn't been loaded yet, then only include the titles in the details.
      */
     get txDetails(): Detail[] {
-        let details: Detail[]
-        if (this.isLoading) {
-            details = [
-                {
-                    title: this.$i18n.t('block.number')
-                },
-                {
-                    title: this.$i18n.t('common.hash')
-                },
-                {
-                    title: this.$i18n.t('common.timestmp')
-                },
-                {
-                    title: this.$i18n.t('tx.from')
-                },
-                {
-                    title: this.$i18n.t('common.amount')
-                },
-                {
-                    title: this.$i18n.t('tx.to').toString()
-                },
-                {
-                    title: this.$i18n.t('gas.limit')
-                },
-                {
-                    title: this.$i18n.t('gas.used')
-                },
-                {
-                    title: this.$i18n.t('gas.price')
-                },
-                {
-                    title: this.$i18n.tc('tx.fee', 1)
-                }
-            ]
-        } else {
-            const isContractCreation = "typeof this.transaction.contractAddress !== 'string'"
-            const tsx = this.ethTransaction
-            details = [
-                {
-                    title: this.$i18n.t('common.hash'),
-                    detail: tsx.txHash, // this.transaction.hash,
-                    copy: true,
-                    mono: true
-                },
-                {
-                    title: this.$i18n.t('tx.from'),
-                    detail: tsx.src, // this.transaction.from,
-                    copy: true,
-                    // link: `/address/${this.transaction.from}`,
-                    mono: true,
-                    toChecksum: true
-                },
-                {
-                    title: isContractCreation ? this.$i18n.t('tx.to').toString() : this.$t('contract.creation').toString(),
-                    detail: tsx.dst, // isContractCreation ? this.transaction.to : this.transaction.contractAddress,
-                    copy: tsx.dst !== undefined,
-                    // link: this.transaction.to !== null ? `/address/${this.transaction.to!}` : `/address/${this.transaction.contractAddress}`,
-                    // mono: this.transaction.to !== null,
-                    toChecksum: true
-                },
-                {
-                    title: this.$i18n.t('common.amount'),
-                    // detail: tsx.value // `${this.txAmount.value} ${this.$t(`common.${this.txAmount.unit}`)}`,
-                    detail: `${this.txAmount.value} ${this.$t(`common.${this.txAmount.unit}`)}`,
-                    // tooltip: this.txAmount.tooltipText ? `${this.txAmount.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
-                },
-
-                {
-                    title: this.$i18n.t('tx.fee'),
-                    detail: `${this.txFee.value} ${this.$t(`common.${this.txFee.unit}`)}`,
-                    // tooltip: this.txFee.tooltipText ? `${this.txFee.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
-                },
-                {
-                    title: this.$i18n.t('tx.status'),
-                    detail: '-' // `${this.$i18n.tc('tx.' + this.txStatus, 1)}`
-                },
-                {
-                    title: this.$i18n.t('gas.limit'),
-                    detail: tsx.gasLimit // this.formatNumber(new BN(this.transaction.gas).toNumber())
-                    // tooltip: this.transaction.gasFormatted.tooltipText ? `${this.transaction.gasFormatted.tooltipText}` : undefined
-                },
-
-                {
-                    title: this.$i18n.t('gas.price'),
-                    // detail: tsx.gasPrice // `${this.gasPrice.value} ${this.$t(`common.${this.gasPrice.unit}`)}`,
-                    detail: `${this.gasPrice.value} ${this.$t(`common.${this.gasPrice.unit}`)}`,
-                    // tooltip: this.gasPrice.tooltipText ? `${this.gasPrice.tooltipText} ${this.$i18n.t('common.eth')}` : undefined
-                },
-                {
-                    title: this.$i18n.t('gas.used'),
-                    detail: this.formatNumber(new BN(tsx.gas || 0).toNumber())
-                    // tooltip: receipt && receipt.gasUsedFormatted.tooltipText ? `${receipt.gasUsedFormatted.tooltipText}` : undefined
-                },
-                {
-                    title: this.$i18n.t('common.nonce'),
-                    detail: this.nonce
-                    // tooltip: this.transaction.nonce.tooltipText ? `${this.transaction.nonce.tooltipText}` : undefined
-                },
-
-                {
-                    title: this.$i18n.t('tx.input'),
-                    detail: tsx.input
-                    // txInput: this.inputFormatted
-                }
-            ]
-            if (this.txStatus !== 'pending' && !this.isReplaced) {
-                const time = {
-                    title: this.$i18n.t('common.timestmp'),
-                    detail: '-' // this.transaction.timestamp !== null ? new Date(this.transaction.timestamp * 1e3).toString() : ''
-                }
-                details.splice(1, 0, time)
+        const tx = this.ethTransaction
+        const isContractCreation = !!tx && !!tx.contractAddress
+        return [
+            'block.number',
+            'common.hash',
+            'common.nonce',
+            'common.timestmp',
+            'tx.from',
+            isContractCreation ? 'contract.creation' : 'tx.to',
+            'common.amount',
+            'tx.fee',
+            'gas.limit',
+            'gas.used',
+            'gas.price',
+            'tx.status',
+            'tx.input'
+        ].map(label => {
+            const row: Detail = { title: this.$i18n.t(label) }
+            if (this.isLoading) {
+                return row
             }
-
-            if (this.txStatus !== 'pending' && !this.isReplaced) {
-                const block = {
-                    title: this.$i18n.t('block.number'),
-                    detail: '-' // this.formatNumber(this.transaction.blockNumber || 0),
-                    // link: `/block/number/${this.transaction.blockNumber}`
-                }
-                details.splice(0, 0, block)
+            switch (label) {
+                case 'block.number':
+                    row.detail = tx.blockNumber || '-'
+                    break
+                case 'common.hash':
+                    row.detail = tx.txHash
+                    row.copy = true
+                    row.mono = true
+                    break
+                case 'common.nonce':
+                    row.detail = this.nonce
+                    break
+                case 'common.timestmp':
+                    row.detail = '-'
+                    if (tx.timestamp) {
+                        row.detail = new Date(tx.timestamp * 1e3).toLocaleString()
+                    }
+                    break
+                case 'tx.from':
+                    row.detail = tx.src
+                    row.copy = true
+                    row.mono = true
+                    row.toChecksum = true
+                    break
+                case 'tx.to':
+                    row.detail = tx.to
+                    row.copy = true
+                    row.mono = true
+                    row.toChecksum = true
+                    break
+                case 'contract.creation':
+                    row.detail = tx.contractAddress
+                    row.copy = true
+                    row.mono = true
+                    row.toChecksum = true
+                    break
+                case 'common.amount':
+                    row.detail = `${this.txAmount.value} ${this.$t(`common.${this.txAmount.unit}`)}`
+                    break
+                case 'tx.fee':
+                    row.detail = `${this.txFee.value} ${this.$t(`common.${this.txFee.unit}`)}`
+                    break
+                case 'gas.limit':
+                    row.detail = this.formatNumber(new BN(tx.gas || 0, 16).toNumber())
+                    break
+                case 'gas.used':
+                    row.detail = this.formatNumber(new BN(tx.gasUsed || 0, 16).toNumber())
+                    break
+                case 'gas.price':
+                    row.detail = `${this.gasPrice.value} ${this.$t(`common.${this.gasPrice.unit}`)}`
+                    break
+                case 'tx.status':
+                    row.detail = this.$i18n.t(this.status).toString()
+                    break
+                case 'tx.input':
+                    row.detail = tx.input || '0x'
+                    break
             }
-            // if (this.transaction.replacedBy !== null) {
-            //     const replaced = {
-            //         title: this.$i18n.t('tx.replaced'),
-            //         detail: this.transaction.replacedBy,
-            //         copy: true,
-            //         link: this.transaction.replacedBy,
-            //         mono: true
-            //     }
-            //     details.splice(1, 0, replaced)
-            // }
-        }
-
-        return details
+            return row
+        })
     }
 
     /**
@@ -275,47 +227,41 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
         return this.formatNonVariableGWeiValue(new BN(this.ethTransaction.gasPrice))
     }
 
+    /**
+     * Gets the formated nonce.
+     *
+     * @return {String}
+     */
     get nonce(): string {
-      return this.formatNumber(new BN(this.ethTransaction.nonce, 16));
+        return this.formatNumber(new BN(this.ethTransaction.nonce, 16))
     }
+
     /**
      * Gets the tx status.
      *
      * @return {String}
      */
-    get txStatus(): string {
+    get status(): string {
+        if (!this.ethTransaction || this.ethTransaction.status === undefined) {
+            return ''
+        }
         if (this.isReplaced) {
-          console.log('replaceddddd')
-            return 'replaced-tx'
+            return TxStatus.replaced
         }
-        const statuses = ['0x0', '0x1']
-        if (this.transaction && this.transaction.status === statuses[0]) {
-            return 'failed'
+        switch (this.ethTransaction.status) {
+            case '00':
+                return TxStatus.failed
+            case '01':
+                return TxStatus.success
+            default:
+                return TxStatus.pending
         }
-        if (this.transaction && this.transaction.status === statuses[1]) {
-            return 'success'
-        }
-        return 'pending'
     }
 
     get isReplaced(): boolean {
-      console.log('zzz', this.transaction && this.transaction.replacedBy !== null)
-        return this.transaction && this.transaction.replacedBy !== null
+        return this.ethTransaction && Boolean(this.ethTransaction.replacedBy).valueOf()
     }
 
-    get titleStatus(): TxStatus {
-        if (!this.isReplaced && this.transaction) {
-            switch (this.transaction.status) {
-                case '0x0':
-                    return TxStatus.failed
-                case '0x1':
-                    return TxStatus.success
-                default:
-                    return TxStatus.pending
-            }
-        }
-        return TxStatus.replaced
-    }
     /**
      * Calculate the transaction fee.
      *
