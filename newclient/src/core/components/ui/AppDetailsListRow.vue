@@ -56,7 +56,7 @@
             </v-flex>
             <v-flex v-if="detail.txInput" hidden-sm-and-down sm9 md10>
                 <div class="data-input pa-3">
-                    <p v-for="(item, index) in detail.txInput" :key="index" class="mb-2">{{ item }}</p>
+                    <p v-for="(item, index) in detail.txInput" :key="index" class="mb-2 break-words">{{ item }}</p>
                 </div>
             </v-flex>
         </v-layout>

@@ -100,6 +100,10 @@ p {
     font-size: 14px;
 }
 
+.break-words {
+    word-break: break-all;
+}
+
 /* Global Tooltip */
 .tooltip-border {
     border: 1px solid #b4bfd2 !important;
