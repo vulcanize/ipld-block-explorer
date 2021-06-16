@@ -165,7 +165,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
                     row.toChecksum = true
                     break
                 case 'tx.to':
-                    row.detail = tx.to
+                    row.detail = `0x${tx.to}`
                     row.copy = true
                     row.mono = true
                     row.toChecksum = true
@@ -195,7 +195,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
                     row.detail = this.$i18n.t(this.status).toString()
                     break
                 case 'tx.input':
-                    row.detail = tx.input || '0x'
+                    row.txInput = [ `0x${tx.input}` ]
                     break
             }
             return row

@@ -38,7 +38,7 @@ import BN from 'bignumber.js'
 import { ErrorMessageBlock } from '@app/modules/blocks/models/ErrorMessagesForBlock'
 import newBlockFeed from '../../NewBlockSubscription/newBlockFeed.graphql'
 import { excpBlockNotMined } from '@app/apollo/exceptions/errorExceptions'
-import { decodeHeaderData } from '@vulcanize/eth-watcher-ts/dist/utils'
+import { decodeHeaderData, decodeExtra } from '@vulcanize/eth-watcher-ts/dist/utils'
 
 @Component({
     components: {
@@ -218,7 +218,10 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.t('block.data'),
-                    detail: this.header.extra,
+                    txInput: [
+                        decodeExtra(this.header.extra),
+                        `(Hex: ${this.header.extra})`
+                    ],
                     mono: true
                 },
 
@@ -228,7 +231,7 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.t('gas.used'),
-                    detail: this.formatNumber(+this.header.gasUsed)
+                    detail: this.formatNumber(new BN(this.header.gasUsed, 16))
                 },
                 {
                     title: this.$i18n.t('block.logs'),
