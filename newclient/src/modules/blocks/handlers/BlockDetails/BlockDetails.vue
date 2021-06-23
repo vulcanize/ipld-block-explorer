@@ -26,7 +26,7 @@
 import AppDetailsList from '@app/core/components/ui/AppDetailsList.vue'
 import BlockDetailsTitle from '@app/modules/blocks/components/BlockDetailsTitle.vue'
 import { Detail, Crumb } from '@app/core/components/props'
-import { eth } from '@app/core/helper'
+import configs from '@app/configs'
 import { Mixins, Component, Prop } from 'vue-property-decorator'
 import { NumberFormatMixin } from '@app/core/components/mixins/number-format.mixin'
 import { getBlockByNumber, getBlockByHash, getLastBlockNumber, getHeaderByNumber } from './blockDetails.graphql'
@@ -38,7 +38,7 @@ import BN from 'bignumber.js'
 import { ErrorMessageBlock } from '@app/modules/blocks/models/ErrorMessagesForBlock'
 import newBlockFeed from '../../NewBlockSubscription/newBlockFeed.graphql'
 import { excpBlockNotMined } from '@app/apollo/exceptions/errorExceptions'
-import { decodeHeaderData, decodeExtra } from '@vulcanize/eth-watcher-ts/dist/utils'
+import { decodeHeaderData, decodeExtra, extractMinerFromExtra } from '@vulcanize/eth-watcher-ts/dist/utils'
 
 @Component({
     components: {
@@ -60,7 +60,12 @@ import { decodeHeaderData, decodeExtra } from '@vulcanize/eth-watcher-ts/dist/ut
             update: data => data.getBlockByHash || data.getHeaderById,
             result({ data }) {
                 if (data.ethHeaderCidByBlockNumber && data.ethHeaderCidByBlockNumber.nodes.length) {
-                  const _obj = decodeHeaderData(data.ethHeaderCidByBlockNumber.nodes[0].blockByMhKey.data)
+                  const blockRlp = data.ethHeaderCidByBlockNumber.nodes[0].blockByMhKey.data;
+                  const _obj = decodeHeaderData(blockRlp);
+                  if (configs.IS_POA_NETWORK) {
+                    const minerAddress = extractMinerFromExtra(blockRlp);
+                    _obj.address = minerAddress;
+                  }
                   const transactionsCount = data.ethHeaderCidByBlockNumber.nodes[0].ethTransactionCidsByHeaderId.totalCount
                   this.header = {...data.ethHeaderCidByBlockNumber.nodes[0], ..._obj, transactionsCount}
                 }

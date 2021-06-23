@@ -1347,10 +1347,10 @@
   resolved "https://registry.yarnpkg.com/@vue/web-component-wrapper/-/web-component-wrapper-1.2.0.tgz#bb0e46f1585a7e289b4ee6067dcc5a6ae62f1dd1"
   integrity sha512-Xn/+vdm9CjuC9p3Ae+lTClNutrVhsXpzxvoTXXtoys6kVRX9FkueSUAqSWAyZntmVLlR4DosBV4pH8y5Z/HbUw==
 
-"@vulcanize/eth-watcher-ts@0.0.22":
-  version "0.0.22"
-  resolved "https://npm.pkg.github.com/download/@vulcanize/eth-watcher-ts/0.0.22/5909e654da32f738f73717ccc47fd30cc7259a62b809112bc2272bc1f49ef502#aef480160ff20b952a8791bd71bd178f1f529d36"
-  integrity sha512-N1FPrRZg0eoIgk4DXTFHWzjlXGjv7a6DoGc3vTiz2mocSbUP5sxrvbcA0sdSjhllj/n2gxbCZe8GAIJTYJgGHw==
+"@vulcanize/eth-watcher-ts@0.0.23":
+  version "0.0.23"
+  resolved "https://npm.pkg.github.com/download/@vulcanize/eth-watcher-ts/0.0.23/5ec6a8c6a2ee072d7a4d1779d693761ace187f7830d79aa9a63181e49e6a27d4#d9b98ab8ce6f46377e05cc66841977c1ea486635"
+  integrity sha512-k9VNd+J3SG7KSbWqpCHfn2RhpKmqW5AgxR9J1CIdL8QUtJdzIEnAwYMseTjPEP24ucZgYPJ9bJEvuRNn2qpAyg==
   dependencies:
     "@apollo/client" "^3.2.0"
     "@graphile/pg-pubsub" "^4.11.0"
