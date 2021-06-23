@@ -60,15 +60,24 @@ import { decodeHeaderData, decodeExtra, extractMinerFromExtra } from '@vulcanize
             update: data => data.getBlockByHash || data.getHeaderById,
             result({ data }) {
                 if (data.ethHeaderCidByBlockNumber && data.ethHeaderCidByBlockNumber.nodes.length) {
-                  const blockRlp = data.ethHeaderCidByBlockNumber.nodes[0].blockByMhKey.data;
+                  const block = data.ethHeaderCidByBlockNumber.nodes[0]
+                  const uncle = block.uncleCidsByHeaderId.nodes || []
+                  const trans = block.ethTransactionCidsByHeaderId.nodes || []
+
+                  const blockRlp = block.blockByMhKey.data;
                   const _obj = decodeHeaderData(blockRlp);
+                  const headerSize: number = block.blockByMhKey.data.slice(2).length / 2
+                  const unclesSize: number = uncle.reduce((sz, { blockByMhKey: { data } }) => sz + data.slice(2).length / 2, 0)
+                  const txheadsSize: number = trans.reduce((sz, { blockByMhKey: { data } }) => sz + data.slice(2).length / 2, 0)
+                  const transactionsCount = trans.totalCount
+
                   if (configs.IS_POA_NETWORK) {
                     const minerAddress = extractMinerFromExtra(blockRlp);
                     _obj.address = minerAddress;
                   }
-                  const transactionsCount = data.ethHeaderCidByBlockNumber.nodes[0].ethTransactionCidsByHeaderId.totalCount
-                  this.header = {...data.ethHeaderCidByBlockNumber.nodes[0], ..._obj, transactionsCount}
-                }
+                  this.header = { ...block, ..._obj, transactionsCount, size: headerSize + unclesSize + txheadsSize }
+
+                  }
                 if (this.header) {
                     if (this.isHash) {
                         this.emitBlockNumber()
@@ -210,7 +219,7 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.t('common.size'),
-                    detail: '-', // `${this.formatNumber(this.block.size)} ${this.$i18n.t('block.bytes')}`
+                    detail: `${this.formatNumber(new BN(this.header.size).toNumber())} Byte`,
                 },
                 {
                     title: this.$i18n.t('common.nonce'),
