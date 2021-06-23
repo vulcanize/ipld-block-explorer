@@ -105,6 +105,7 @@ export default class TableBlocksRow extends Mixins(NumberFormatMixin) {
             cid: this.block.cid,
             reward: this.formatNonVariableEthValue(new BN(this.block.reward)),
             miner: decodedDat.address,
+            address: decodedDat.address,
             // number: this.formatNumber(this.block.number),
             // miner: this.block.miner,
             // rewards: this.formatNonVariableEthValue(new BN(this.block.rewards.total)),
