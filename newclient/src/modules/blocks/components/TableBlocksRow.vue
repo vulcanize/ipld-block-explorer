@@ -81,11 +81,12 @@ import { Component, Prop, Mixins } from 'vue-property-decorator'
 import AppTransformHash from '@app/core/components/ui/AppTransformHash.vue'
 import { NumberFormatMixin } from '@app/core/components/mixins/number-format.mixin'
 import AppTimeAgo from '@app/core/components/ui/AppTimeAgo.vue'
-import { decodeHeaderData } from '@vulcanize/eth-watcher-ts/dist/utils'
+import {decodeHeaderData, extractMinerFromExtra} from '@vulcanize/eth-watcher-ts/dist/utils'
 
 import BN from 'bignumber.js'
 
 import AppTooltip from '@app/core/components/ui/AppTooltip.vue'
+import configs from "@app/configs";
 
 @Component({
     components: {
@@ -97,19 +98,24 @@ import AppTooltip from '@app/core/components/ui/AppTooltip.vue'
 export default class TableBlocksRow extends Mixins(NumberFormatMixin) {
     @Prop(Object) block!: any
     get _block(): any {
-        const decodedDat = decodeHeaderData(this.block.blockByMhKey.data)
+        const blockRlp = this.block.blockByMhKey.data
+        const decodedData = decodeHeaderData(blockRlp)
+        if (configs.IS_POA_NETWORK) {
+          const minerAddress = extractMinerFromExtra(blockRlp);
+          decodedData.address = minerAddress;
+        }
         return {
             id: this.block.id,
             blockHash: this.block.blockHash,
             blockNumber: this.block.blockNumber,
             cid: this.block.cid,
             reward: this.formatNonVariableEthValue(new BN(this.block.reward)),
-            miner: decodedDat.address,
-            address: decodedDat.address,
+            miner: decodedData.address,
+            address: decodedData.address,
             // number: this.formatNumber(this.block.number),
             // miner: this.block.miner,
             // rewards: this.formatNonVariableEthValue(new BN(this.block.rewards.total)),
-            timestamp: decodedDat.time, // new Date(this.block.timestamp * 1e3),
+            timestamp: decodedData.time, // new Date(this.block.timestamp * 1e3),
             totalTx: 'totalTx', // this.formatNumber(this.block.txCount),
             txFail: 'txFail', // 'this.formatNumber(this.block.txFail)',
             // txSuccess: this.formatNumber(this.block.txCount - this.block.txFail)
