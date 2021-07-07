@@ -113,7 +113,7 @@
                     </v-layout>
                 </v-flex>
                 <v-spacer />
-<!--                <v-flex xs9 sm7 md6> <search-details /> </v-flex>-->
+                <v-flex xs9 sm7 md6> <search-details /> </v-flex>
             </v-layout>
 <!--            <template v-if="showSearchMobile" #extension>-->
 <!--                <v-layout row justify-center align-center>-->

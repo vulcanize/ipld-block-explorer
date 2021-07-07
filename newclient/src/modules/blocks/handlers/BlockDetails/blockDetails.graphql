@@ -82,6 +82,40 @@ query getHeaderByNumber($blockRef: BigInt!) {
     }
 }
 
+query getHeaderByHash($blockRef: String) {
+  ethHeaderCidByBlockHash(hash: $blockRef) {
+    nodes {
+      blockHash
+      blockNumber
+      cid
+      td
+      blockByMhKey {
+        data
+      }
+      parentHash
+      receiptRoot
+      reward
+      txRoot
+      stateRoot
+      ethTransactionCidsByHeaderId {
+        totalCount
+        nodes {
+          blockByMhKey {
+            data
+          }
+        }
+      }
+      uncleCidsByHeaderId {
+        nodes {
+          blockByMhKey {
+            data
+          }
+        }
+      }
+    }
+  }
+}
+
 query getBlockByHash($blockRef: String!) {
     getBlockByHash(hash: $blockRef) {
         ...BlockDetails

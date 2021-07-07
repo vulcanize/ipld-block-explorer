@@ -79,7 +79,8 @@ import { decodeTransactionData, decodeReceiptData } from '@vulcanize/eth-watcher
                         ...decodedData,
                         ...decodedReceipt,
                         ...others,
-                        contractAddress: receiptCidByTxId.contract
+                        contractAddress: receiptCidByTxId.contract,
+                        gasUsed: receiptCidByTxId.gasUsed,
                     }
                     this.emitErrorState(false)
                 } else {
@@ -233,7 +234,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      * @return {String}
      */
     get nonce(): string {
-        return this.formatNumber(new BN(this.ethTransaction.nonce, 16))
+        return this.formatNumberWOSeparator(new BN(this.ethTransaction.nonce, 16))
     }
 
     /**
