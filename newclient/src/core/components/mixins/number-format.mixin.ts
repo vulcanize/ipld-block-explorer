@@ -16,6 +16,9 @@ export class NumberFormatMixin extends Vue {
     formatNumber(value: number | BigNumber): string {
         return new BigNumber(value).toFormat().toString()
     }
+    formatNumberWOSeparator(value: number | BigNumber): string {
+        return new BigNumber(value).toFormat({groupSeparator: ''}).toString()
+    }
     /* Formatted integers (Group II) */
 
     formatIntegerValue(value: BigNumber): FormattedNumber {

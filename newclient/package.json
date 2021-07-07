@@ -75,7 +75,7 @@
         "@vue/cli-service": "^3.12.1",
         "@vue/eslint-config-prettier": "^6.0.0",
         "@vue/eslint-config-typescript": "^3.2.0",
-        "@vulcanize/eth-watcher-ts": "0.0.23",
+        "@vulcanize/eth-watcher-ts": "0.0.24",
         "apollo": "^2.27.4",
         "css-loader": "^2.1.1",
         "depcheck": "^1.2.0",

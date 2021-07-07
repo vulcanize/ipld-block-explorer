@@ -223,9 +223,9 @@ export default class SearchDetails extends Vue {
             { text: this.$t('filter.all'), value: 'all' },
             { text: this.$t('kb.terms.block.term'), value: 'block' },
             { text: this.$tc('tx.name-short', 1), value: 'transaction' },
-            { text: this.$tc('address.name', 1), value: 'address' },
-            { text: this.$tc('token.name', 1), value: 'token-detail' },
-            { text: this.$tc('uncle.name', 1), value: 'uncle' }
+            // { text: this.$tc('address.name', 1), value: 'address' },
+            // { text: this.$tc('token.name', 1), value: 'token-detail' },
+            // { text: this.$tc('uncle.name', 1), value: 'uncle' }
         ]
     }
 }

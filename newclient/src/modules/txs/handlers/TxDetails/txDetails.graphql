@@ -37,6 +37,7 @@ query getEthTransactionByHash($hash: String!) {
                     data
                 }
                 contract
+                gasUsed
             }
             ethHeaderCidByHeaderId {
                 blockHash

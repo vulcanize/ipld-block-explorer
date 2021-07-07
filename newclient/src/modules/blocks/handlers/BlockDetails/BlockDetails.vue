@@ -29,7 +29,7 @@ import { Detail, Crumb } from '@app/core/components/props'
 import configs from '@app/configs'
 import { Mixins, Component, Prop } from 'vue-property-decorator'
 import { NumberFormatMixin } from '@app/core/components/mixins/number-format.mixin'
-import { getBlockByNumber, getBlockByHash, getLastBlockNumber, getHeaderByNumber } from './blockDetails.graphql'
+import { getBlockByNumber, getHeaderByHash, getLastBlockNumber, getHeaderByNumber } from './blockDetails.graphql'
 import { HeaderDetails as HeaderDetailsType } from './apolloTypes/BlockDetails'
 import { getLastBlockNumber_getLatestBlockInfo as lastBlockType } from './apolloTypes/getLastBlockNumber'
 import { FormattedNumber } from '@app/core/helper/number-format-helper'
@@ -38,7 +38,7 @@ import BN from 'bignumber.js'
 import { ErrorMessageBlock } from '@app/modules/blocks/models/ErrorMessagesForBlock'
 import newBlockFeed from '../../NewBlockSubscription/newBlockFeed.graphql'
 import { excpBlockNotMined } from '@app/apollo/exceptions/errorExceptions'
-import { decodeHeaderData, decodeExtra, extractMinerFromExtra } from '@vulcanize/eth-watcher-ts/dist/utils'
+import { decodeHeaderData, decodeExtra, extractMinerFromExtra, calcBlockSize } from '@vulcanize/eth-watcher-ts/dist/utils'
 
 @Component({
     components: {
@@ -48,7 +48,7 @@ import { decodeHeaderData, decodeExtra, extractMinerFromExtra } from '@vulcanize
     apollo: {
         header: {
             query() {
-                return this.isHash ? getBlockByHash : getHeaderByNumber
+                return this.isHash ? getHeaderByHash : getHeaderByNumber
             },
             // fetchPolicy: 'network-only',
             variables() {
@@ -57,27 +57,33 @@ import { decodeHeaderData, decodeExtra, extractMinerFromExtra } from '@vulcanize
             // skip() {
             //     return this.subscribed
             // },
-            update: data => data.getBlockByHash || data.getHeaderById,
+            update: data => data.getHeaderByHash || data.getHeaderById,
             result({ data }) {
-                if (data.ethHeaderCidByBlockNumber && data.ethHeaderCidByBlockNumber.nodes.length) {
-                  const block = data.ethHeaderCidByBlockNumber.nodes[0]
-                  const uncle = block.uncleCidsByHeaderId.nodes || []
-                  const trans = block.ethTransactionCidsByHeaderId.nodes || []
+                if ((data.ethHeaderCidByBlockNumber && data.ethHeaderCidByBlockNumber.nodes.length) ||
+                  (data.ethHeaderCidByBlockHash && data.ethHeaderCidByBlockHash.nodes.length)) {
+                  const block = !this.isHash ? data.ethHeaderCidByBlockNumber.nodes[0] : data.ethHeaderCidByBlockHash.nodes[0]
+                  const uncles = block.uncleCidsByHeaderId.nodes || []
+                  const transactions = block.ethTransactionCidsByHeaderId.nodes || []
 
                   const blockRlp = block.blockByMhKey.data;
                   const _obj = decodeHeaderData(blockRlp);
-                  const headerSize: number = block.blockByMhKey.data.slice(2).length / 2
-                  const unclesSize: number = uncle.reduce((sz, { blockByMhKey: { data } }) => sz + data.slice(2).length / 2, 0)
-                  const txheadsSize: number = trans.reduce((sz, { blockByMhKey: { data } }) => sz + data.slice(2).length / 2, 0)
-                  const transactionsCount = trans.totalCount
+                  const transactionsCount = transactions.totalCount
+
+                  const txsRLP = transactions.map(tx => {
+                    return tx.blockByMhKey.data.replace('\\x', '');
+                  })
+                  const unclesRLP = uncles.map(uncle => {
+                    return uncle.blockByMhKey.data.replace('\\x', '');
+                  })
+                  const blockSize = calcBlockSize(blockRlp.replace('\\x', ''), txsRLP, unclesRLP);
 
                   if (configs.IS_POA_NETWORK) {
                     const minerAddress = extractMinerFromExtra(blockRlp);
                     _obj.address = minerAddress;
                   }
-                  this.header = { ...block, ..._obj, transactionsCount, size: headerSize + unclesSize + txheadsSize }
-
-                  }
+                  _obj.extra = `0x${_obj.extra}`
+                  this.header = {..._obj, ...block, transactionsCount, size: blockSize }
+                }
                 if (this.header) {
                     if (this.isHash) {
                         this.emitBlockNumber()
@@ -219,7 +225,7 @@ export default class BlockDetails extends Mixins(NumberFormatMixin, NewBlockSubs
                 },
                 {
                     title: this.$i18n.t('common.size'),
-                    detail: `${this.formatNumber(new BN(this.header.size).toNumber())} Byte`,
+                    detail: `${this.formatNumber(new BN(this.header.size).toNumber())} Bytes`,
                 },
                 {
                     title: this.$i18n.t('common.nonce'),
