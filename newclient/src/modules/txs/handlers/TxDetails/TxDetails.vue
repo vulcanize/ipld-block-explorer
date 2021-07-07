@@ -274,7 +274,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
             // const used = new BN(this.ethTransaction.gas)
             // const fee = price.times(used)
             // return this.formatVariableUnitEthValue(fee)
-            const fee = new BN(this.ethTransaction.gasPrice, 16).multipliedBy(new BN(this.ethTransaction.gas, 16))
+            const fee = new BN(this.ethTransaction.gasPrice, 16).multipliedBy(new BN(this.ethTransaction.gasUsed as string, 16))
             return this.formatVariableUnitEthValue(fee)
         }
         // if (!this.isReplaced && this.txStatus === 'pending') {
