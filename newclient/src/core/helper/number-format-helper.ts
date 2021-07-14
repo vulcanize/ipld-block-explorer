@@ -273,7 +273,7 @@ export class NumberFormatHelper {
          */
         if (gweiBN.isLessThan(SmallGweiBreakpoint)) {
             return {
-                value: value.toFormat(),
+                value: gweiBN.toFormat(),
                 unit,
                 tooltipText: `${gweiBN.toFormat()} ${unit}`
             }
