@@ -79,7 +79,8 @@ import { decodeTransactionData, decodeReceiptData } from '@vulcanize/eth-watcher
                         ...decodedData,
                         ...decodedReceipt,
                         ...others,
-                        contractAddress: receiptCidByTxId.contract
+                        contractAddress: receiptCidByTxId.contract,
+                        gasUsed: receiptCidByTxId.gasUsed,
                     }
                     this.emitErrorState(false)
                 } else {
@@ -186,10 +187,11 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
                     row.detail = this.formatNumber(new BN(tx.gas || 0, 16).toNumber())
                     break
                 case 'gas.used':
-                    row.detail = this.formatNumber(new BN(tx.gasUsed || 0, 16).toNumber())
+                    row.detail = this.formatNumber(new BN(tx.gasUsed || 0, 10).toNumber())
                     break
                 case 'gas.price':
                     row.detail = `${this.gasPrice.value} ${this.$t(`common.${this.gasPrice.unit}`)}`
+                    row.tooltip = this.gasPrice.tooltipText
                     break
                 case 'tx.status':
                     row.detail = this.$i18n.t(this.status).toString()
@@ -224,7 +226,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      * @return {FormattedNumber}
      */
     get gasPrice(): FormattedNumber {
-        return this.formatNonVariableGWeiValue(new BN(this.ethTransaction.gasPrice))
+        return this.formatNonVariableGWeiValue(new BN(this.ethTransaction.gasPrice, 16))
     }
 
     /**
@@ -233,7 +235,7 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      * @return {String}
      */
     get nonce(): string {
-        return this.formatNumber(new BN(this.ethTransaction.nonce, 16))
+        return this.formatNumberWOSeparator(new BN(this.ethTransaction.nonce, 16))
     }
 
     /**
@@ -269,12 +271,10 @@ export default class TxDetails extends Mixins(NumberFormatMixin) {
      */
     get txFee(): FormattedNumber {
         if (this.ethTransaction && this.ethTransaction.gas && this.ethTransaction.gasPrice) {
-            // const price = new BN(this.ethTransaction.gasPrice)
-            // const used = new BN(this.ethTransaction.gas)
-            // const fee = price.times(used)
-            // return this.formatVariableUnitEthValue(fee)
-            const fee = new BN(this.ethTransaction.gasPrice, 16).multipliedBy(new BN(this.ethTransaction.gas, 16))
-            return this.formatVariableUnitEthValue(fee)
+            const price = new BN(this.ethTransaction.gasPrice, 16)
+            const used = new BN(this.ethTransaction.gasUsed as string, 10)
+            const fee = price.times(used)
+            return this.formatNonVariableEthValue(fee)
         }
         // if (!this.isReplaced && this.txStatus === 'pending') {
         //     // const fee = new BN(this.transaction.gas).multipliedBy(this.transaction.gasPrice)

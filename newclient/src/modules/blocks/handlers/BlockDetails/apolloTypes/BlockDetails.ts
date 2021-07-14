@@ -47,4 +47,5 @@ export interface HeaderDetails {
   difficulty: string;
   td: string;
   gasLimit: string;
+  size: number;
 }
